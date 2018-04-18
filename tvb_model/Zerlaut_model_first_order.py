@@ -103,178 +103,183 @@ class Zerlaut_model_first_order(Model):
     # Define traited attributes for this model, these represent possible kwargs.
     g_l = arrays.FloatArray(
         label=":math:`g_{l}`",
-        default=numpy.array([1.0]),
-        range=basic.Range(lo=0.0, hi=10.0, step=0.1), #TODO need to define the range
+        default=numpy.array([10.]), # 10 nS by default, i.e. ~ 100MOhm input resitance at rest
+        range=basic.Range(lo=0.1, hi=100.0, step=0.1), # 0.1nS would be a very small cell, 100nS a very big one
         doc="""leak conductance [nS]""",
         order=1)
 
     E_L = arrays.FloatArray(
         label=":math:`E_{L}`",
         default=numpy.array([-65.0]),
-        range=basic.Range(lo=-70.0, hi=-60.0, step=0.1), #TODO need to define the range
+        range=basic.Range(lo=-90.0, hi=-60.0, step=0.1), # resting potential, usually between -85mV and -65mV
         doc="""leak reversal potential [mV]""",
         order=2)
 
+    # N.B. Not independent of g_L, C_m should scale linearly with g_L
     C_m = arrays.FloatArray(
         label=":math:`C_{m}`",
         default=numpy.array([150]),
-        range=basic.Range(lo=100.0, hi=200.0, step=10.0), #TODO need to define the range
+        range=basic.Range(lo=10.0, hi=500.0, step=10.0), # 20pF very small cell, 400pF very 
         doc="""membrane capacitance [pF]""",
         order=3)
 
     V_th = arrays.FloatArray(
         label=":math:`V_{thre}`",
         default=numpy.array([-50.0]),
-        range=basic.Range(lo=-60.0, hi=-40.0, step=0.1), #TODO need to define the range
+        range=basic.Range(lo=-60.0, hi=-40.0, step=0.1), 
         doc="""AP threshold [mV]""",
         order=4)
 
     tau_ref = arrays.FloatArray(
         label=r":math:`\tau_{refrec}`",
         default=numpy.array([5.0]),
-        range=basic.Range(lo=0.0, hi=10.0, step=0.01), #TODO need to define the range
+        range=basic.Range(lo=0.1, hi=10.0, step=0.1), 
         doc="""refractory period [ms]""",
         order=5)
 
     tau_w = arrays.FloatArray(
         label=r":math:`\tau_w`",
         default=numpy.array([500.0]),
-        range=basic.Range(lo=400.0, hi=600.0, step=10.0), #TODO need to define the range
+        range=basic.Range(lo=0.0, hi=1000.0, step=10.0), # from 0ms to 1s, sometimes you might want to remove this feature
         doc="""adaptation time constant [ms]""",
         order=6)
 
     k_a_e = arrays.FloatArray(
         label=":math:`Excitatory k_a`",
         default=numpy.array([2.0]),
-        range=basic.Range(lo=0.0, hi=3.0, step=0.1), #TODO need to define the range
+        range=basic.Range(lo=0.0, hi=5.0, step=0.1), 
         doc="""Excitatory sodium sharpness [mV]""",
         order=7)
 
     b_e = arrays.FloatArray(
         label=":math:`Excitatory b`",
         default=numpy.array([20.0]),
-        range=basic.Range(lo=10.0, hi=30.0, step=0.1), #TODO need to define the range
+        range=basic.Range(lo=0.0, hi=100.0, step=0.1), # here also from 0, to remove it if one wants
         doc="""Excitatory adaptation current increment [pA]""",
         order=8)
 
     a_e = arrays.FloatArray(
         label=":math:`Excitatory a`",
         default=numpy.array([4.0]),
-        range=basic.Range(lo=1.0, hi=20.0, step=0.1), #TODO need to define the range
+        range=basic.Range(lo=1.0, hi=20.0, step=0.1),
         doc="""Excitatory adaptation conductance [nS]""",
         order=9)
 
     k_a_i = arrays.FloatArray(
         label=":math:`Inhibitory k_a`",
         default=numpy.array([0.5]),
-        range=basic.Range(lo=0.0, hi=3.0, step=0.1), #TODO need to define the range
+        range=basic.Range(lo=0.0, hi=5.0, step=0.1), 
         doc="""Inhibitory sodium sharpness [mV]""",
         order=10)
 
     b_i = arrays.FloatArray(
         label=":math:`Inhibitory b`",
         default=numpy.array([0.0]),
-        range=basic.Range(lo=0.0, hi=30.0, step=0.1), #TODO need to define the range
+        range=basic.Range(lo=0.0, hi=100.0, step=0.1),
         doc="""Inhibitory adaptation current increment [pA]""",
         order=11)
 
     a_i = arrays.FloatArray(
         label=":math:`Inhibitory a`",
         default=numpy.array([0.0]),
-        range=basic.Range(lo=0.0, hi=20.0, step=0.1), #TODO need to define the range
-        doc="""Excitatory adaptation conductance [nS]""",
+        range=basic.Range(lo=0.0, hi=20.0, step=0.1),
+        doc="""Inhibitory adaptation conductance [nS]""",
         order=12)
 
     E_e = arrays.FloatArray(
         label=r":math:`E_e`",
         default=numpy.array([0.0]),
-        range=basic.Range(lo=0.0, hi=60., step=0.01), #TODO need to define the range
+        range=basic.Range(lo=-20., hi=20., step=0.01),
         doc="""excitatory reversal potential [mV]""",
         order=13)
 
     E_i = arrays.FloatArray(
         label=":math:`E_i`",
         default=numpy.array([-80.0]),
-        range=basic.Range(lo=-90.0, hi=-70.0, step=1.0), #TODO need to define the range
+        range=basic.Range(lo=-100.0, hi=-60.0, step=1.0), 
         doc="""inhibitory reversal potential [mV]""",
         order=14)
 
     Q_e = arrays.FloatArray(
-        label=r":math:`Q_i`",
+        label=r":math:`Q_e`",
         default=numpy.array([1.0]),
-        range=basic.Range(lo=0.0, hi=2.0, step=0.01), #TODO need to define the range
+        range=basic.Range(lo=0.0, hi=5.0, step=0.1),
         doc="""excitatory quantal conductance [nS]""",
         order=15)
 
     Q_i = arrays.FloatArray(
         label=r":math:`Q_i`",
         default=numpy.array([5.0]),
-        range=basic.Range(lo=0.0, hi=6.0, step=0.1), #TODO need to define the range
+        range=basic.Range(lo=0.0, hi=10.0, step=0.1),
         doc="""inhibitory quantal conductance [nS]""",
         order=16)
 
     tau_e = arrays.FloatArray(
         label=":math:`\tau_e`",
         default=numpy.array([5.0]),
-        range=basic.Range(lo=1.0, hi=6.0, step=1.0), #TODO need to define the range
+        range=basic.Range(lo=1.0, hi=10.0, step=1.0),
         doc="""excitatory decay [ms]""",
         order=17)
 
     tau_i = arrays.FloatArray(
         label=":math:`\tau_i`",
         default=numpy.array([5.0]),
-        range=basic.Range(lo=0.5, hi=2.0, step=0.01), #TODO need to define the range
+        range=basic.Range(lo=0.5, hi=10.0, step=0.01),
         doc="""inhibitory decay [ms]""",
         order=18)
 
     N_tot = arrays.IntegerArray(
         label=":math:`N_{tot}`",
         default=numpy.array([10000]),
-        range=basic.Range(lo=1000, hi=20000, step=1000), #TODO need to define the range
+        range=basic.Range(lo=1000, hi=50000, step=1000), 
         doc="""cell number""",
         order=19)
 
     p_connect = arrays.FloatArray(
         label=":math:`\epsilon`",
         default=numpy.array([0.05]),
-        range=basic.Range(lo=0.0, hi=1.0, step=0.01), #TODO need to define the range
+        range=basic.Range(lo=0.001, hi=0.2, step=0.001), # valid only for relatively sparse connectivities
         doc="""connectivity probability""",
         order=20)
 
     g = arrays.FloatArray(
         label=":math:`g`",
         default=numpy.array([0.2]),
-        range=basic.Range(lo=0.0, hi=1.0, step=0.01), #TODO need to define the range
+        range=basic.Range(lo=0.01, hi=0.4, step=0.01), # inhibitory cell number never overcomes excitatry ones
         doc="""fraction of inhibitory cells""",
         order=21)
 
     nu_ext = arrays.FloatArray(
         label=":math:`\nu_e^{drive}`",
         default=numpy.array([4.0]),
-        range=basic.Range(lo=0.0, hi=20.0, step=0.01), #TODO need to define the range
+        range=basic.Range(lo=0.0, hi=100.0, step=0.01),
         doc="""external drive""",
         order=22)
 
     T = arrays.FloatArray(
         label=":math:`T`",
         default=numpy.array([5.0]),
-        range=basic.Range(lo=0.0, hi=20.0, step=0.1), #TODO need to define the range
+        range=basic.Range(lo=1., hi=20.0, step=0.1),
         doc="""time scale of describing network activity""",
         order=22)
 
     P_e = arrays.IndexArray(
         label= ":math:`P_e`", #TODO need to check the size of the array when it's used
-        required=False,
-        file_storage=core.FILE_STORAGE_NONE, #TODO need to verified if the value is correct or not
-        # default= numpy.array([]), #TODO need to define the fault value
+        # required=False,
+        # file_storage=core.FILE_STORAGE_NONE, #TODO need to verified if the value is correct or not
+        default= numpy.array([-5.14155819e-02,  6.11046069e-03,  7.44015476e-03,  5.76905434e-05,
+                              -1.52902668e-04,  5.63364410e-04,  2.72814525e-04,  5.27870901e-04,
+                              -6.77080411e-04,  4.89796440e-04,  1.15073958e-03]),
         doc="""Polynome of excitatory phenomenological threshold (order 10)""",
         order=23)
 
     P_i = arrays.IndexArray(
         label=":math:`P_i`", #TODO need to check the size of the array when it's used
-        required=False,
-        file_storage=core.FILE_STORAGE_NONE, #TODO need to verified if the value is correct or not
-        # default= numpy.array([]), #TODO need to define the fault value
+        # required=False,
+        # file_storage=core.FILE_STORAGE_NONE, #TODO need to verified if the value is correct or not
+        default= numpy.array([-5.46160664e-02,  4.58415750e-03, -1.77303201e-03,  6.64785219e-04,
+                              -3.00637490e-04,  3.93520293e-04, -5.14454957e-04, -6.39186948e-06,
+                              -1.39021341e-03, -4.85663596e-04, -3.63617754e-04]),
         doc="""Polynome of inhibitory phenomenological threshold (order 10)""",
         order=24)
 
@@ -282,8 +287,8 @@ class Zerlaut_model_first_order(Model):
     # Used for phase-plane axis ranges and to bound random initial() conditions.
     state_variable_range = basic.Dict(
         label="State Variable ranges [lo, hi]",
-        default={"E": numpy.array([0.0, 100.0]), #TODO need to define the range
-                 "I": numpy.array([0.0, 100.0])}, #TODO need to define the range
+        default={"E": numpy.array([0.01, 200.0]), # actually the 200Hz should be replaced by 1/T_refrac, but let's take that
+                 "I": numpy.array([0.01, 200.0])},
         doc="""The values for each state-variable should be set to encompass
         the expected dynamic range of that state-variable for the current
         parameters, it is used as a mechanism for bounding random inital
@@ -309,7 +314,7 @@ class Zerlaut_model_first_order(Model):
     _nvar = 2
     cvar = numpy.array([0, 1], dtype=numpy.int32)
 
-    def dfun(self, state_variables, coupling, local_coupling=0.0):
+    def dfun(self, state_variables, coupling, local_coupling=0.05):
         r"""
 
         .. math::

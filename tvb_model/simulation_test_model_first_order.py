@@ -20,8 +20,8 @@ what_to_watch = (mon_raw, mon_tavg)
 
 #Initialise a Simulator -- Model, Connectivity, Integrator, and Monitors.
 sim = lab.simulator.Simulator(model = model, connectivity = white_matter,
-                          coupling = white_matter_coupling,
-                          integrator = heunint, monitors = what_to_watch)
+                              coupling = white_matter_coupling,
+                              integrator = heunint, monitors = what_to_watch)
 
 sim.configure()
 # list = sim.run(simulation_length=2 ** 10)
@@ -48,6 +48,7 @@ for raw, tavg in sim(simulation_length=2 ** 8):
 #Make the lists numpy.arrays for easier use.
 RAW = np.array(raw_data)
 TAVG = np.array(tavg_data)
+
 
 #Plot raw time series
 plt.figure(1)

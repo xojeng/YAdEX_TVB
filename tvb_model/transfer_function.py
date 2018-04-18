@@ -21,13 +21,15 @@ class Transfer_Function:
         #   for this we can use the function generate_transfer_function in :
         #   https://bitbucket.org/yzerlaut/mean_field_for_multi_input_integration
         #   ./transfer_functions/tf_simulation.py
-        if P.size == 0: # P is empty
+        if (P is None) or (len(P)==0): # P is empty
             P = [-45e-3]
             for i in range(1,11):
                 P.append(0)
-
-        return params['__Q_e'], params['__tau_e'], params['__E_e'], params['__Q_i'], params['__tau_i'], params['__E_i'], params['__g_l'], \
-               params['__C_m'], params['__E_L'], params['__N_tot'], params['__p_connect'], params['__g'], P[0], P[1], P[2], P[3], P[4], P[5], P[6], P[7], P[8], P[9], P[10]
+                
+        # return params['__Q_e'], params['__tau_e'], params['__E_e'], params['__Q_i'], params['__tau_i'], params['__E_i'], params['__g_l'], \
+        #        params['__C_m'], params['__E_L'], params['__N_tot'], params['__p_connect'], params['__g'], P[0], P[1], P[2], P[3], P[4], P[5], P[6], P[7], P[8], P[9], P[10]
+        return self.model.Q_e, self.model.tau_e, self.model.E_e, self.model.Q_i, self.model.tau_i, self.model.E_i, self.model.g_l, \
+               self.model.C_m, self.model.E_L, self.model.N_tot, self.model.p_connect, self.model.g, P[0], P[1], P[2], P[3], P[4], P[5], P[6], P[7], P[8], P[9], P[10]
 
 
     def get_fluct_regime_vars(self,Fe, Fi, Qe, Te, Ee, Qi, Ti, Ei, Gl, Cm, El, Ntot, pconnec, gei, P0, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10):
@@ -115,3 +117,28 @@ class Transfer_Function:
         :return: result of transfert function
         """
         return self.TF_my_template(fe, fi, *self.pseq_params(self.model,self.P_i))
+
+
+if __name__=='__main__':
+
+    import numpy as np
+    import matplotlib.pylab as plt
+    from matplotlib.cm import viridis
+    from Zerlaut_model_first_order import Zerlaut_model_first_order
+    model = Zerlaut_model_first_order()
+
+    # The model now has the right polynom
+    print(model.P_e)
+    
+    TF = Transfer_Function(model, model.P_e, model.P_i)
+
+    fig, [axE, axI] = plt.subplots(1, 2, figsize=(8,4))
+    fe, fi = np.linspace(0, 20), np.linspace(0., 20.)
+    for i in range(len(fi)):
+        axE.plot(fe, TF.excitatory(fe, fi[i]), color=viridis(i/len(fi)))
+        axI.plot(fe, TF.inhibitory(fe, fi[i]), color=viridis(i/len(fi)))
+    axE.set_title('exc. TF')
+    axI.set_title('inh. TF')
+
+    plt.show()
+    
