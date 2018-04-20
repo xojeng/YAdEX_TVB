@@ -16,7 +16,7 @@ class Transfer_Function:
         self.P_e = P_e
         self.P_i = P_i
 
-    def pseq_params(self,params,P):
+    def pseq_params(self,P):
         #Todo when P is not define, we can find the good polynome with simulation
         #   for this we can use the function generate_transfer_function in :
         #   https://bitbucket.org/yzerlaut/mean_field_for_multi_input_integration
@@ -62,11 +62,11 @@ class Transfer_Function:
 
         # Autocorrelation-time of the fluctuations
         # Eqns 17 from [ZD_2017]
-        fe, fi = fe+1e-9, fi+1e-9 # just to insure a non zero division, #TODO replace 1e-9 by epsilon machine
+        fe, fi = fe+np.finfo(type(fe[0])).eps, fi+np.finfo(type(fi[0])).eps # just to insure a non zero division,
         Tv = ( fe*(Ue*Te)**2 + fi*(Qi*Ui)**2 ) /( fe*(Ue*Te)**2/(Te+Tm) + fi*(Qi*Ui)**2/(Ti+Tm) )
         TvN = Tv*Gl/Cm
 
-        return muV, sV+1e-12, muGn, TvN #TODO replace 1e-12 by epsilon machine
+        return muV, sV+np.finfo(type(sV[0])).eps, muGn, TvN
 
     def erfc_func(self,muV, sV, TvN, Vthre, Gl, Cm):
         # Eqns 3 from [ZD_2017]
@@ -107,7 +107,7 @@ class Transfer_Function:
         :param fi: firing rate of inhibitory population
         :return: result of transfert function
         """
-        return self.TF_my_template(fe, fi, *self.pseq_params(self.model,self.P_e))
+        return self.TF_my_template(fe, fi, *self.pseq_params(self.P_e))
 
     def inhibitory (self,fe, fi):
         """
@@ -116,7 +116,7 @@ class Transfer_Function:
         :param fi: firing rate of inhibitory population
         :return: result of transfert function
         """
-        return self.TF_my_template(fe, fi, *self.pseq_params(self.model,self.P_i))
+        return self.TF_my_template(fe, fi, *self.pseq_params(self.P_i))
 
 
 if __name__=='__main__':
@@ -129,11 +129,11 @@ if __name__=='__main__':
 
     # The model now has the right polynom
     print(model.P_e)
-    
+
     TF = Transfer_Function(model, model.P_e, model.P_i)
 
     fig, [axE, axI] = plt.subplots(1, 2, figsize=(8,4))
-    fe, fi = np.linspace(0, 20), np.linspace(0., 20.)
+    fe, fi = np.linspace(0., 20.), np.linspace(0., 20.)
     for i in range(len(fi)):
         axE.plot(fe, TF.excitatory(fe, fi[i]), color=viridis(i/len(fi)))
         axI.plot(fe, TF.inhibitory(fe, fi[i]), color=viridis(i/len(fi)))

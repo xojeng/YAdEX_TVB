@@ -103,129 +103,129 @@ class Zerlaut_model_first_order(Model):
     # Define traited attributes for this model, these represent possible kwargs.
     g_l = arrays.FloatArray(
         label=":math:`g_{l}`",
-        default=numpy.array([10.]), # 10 nS by default, i.e. ~ 100MOhm input resitance at rest
-        range=basic.Range(lo=0.1, hi=100.0, step=0.1), # 0.1nS would be a very small cell, 100nS a very big one
-        doc="""leak conductance [nS]""",
+        default=numpy.array([10.e-9]), # 10 nS by default, i.e. ~ 100MOhm input resitance at rest
+        range=basic.Range(lo=0.1e-9, hi=100.0e-9, step=0.1e-9), # 0.1nS would be a very small cell, 100nS a very big one
+        doc="""leak conductance [S]""",
         order=1)
 
     E_L = arrays.FloatArray(
         label=":math:`E_{L}`",
-        default=numpy.array([-65.0]),
-        range=basic.Range(lo=-90.0, hi=-60.0, step=0.1), # resting potential, usually between -85mV and -65mV
-        doc="""leak reversal potential [mV]""",
+        default=numpy.array([-65.0e-3]),
+        range=basic.Range(lo=-90.0e-3, hi=-60.0e-3, step=0.1e-3), # resting potential, usually between -85mV and -65mV
+        doc="""leak reversal potential [V]""",
         order=2)
 
     # N.B. Not independent of g_L, C_m should scale linearly with g_L
     C_m = arrays.FloatArray(
         label=":math:`C_{m}`",
-        default=numpy.array([150]),
-        range=basic.Range(lo=10.0, hi=500.0, step=10.0), # 20pF very small cell, 400pF very 
-        doc="""membrane capacitance [pF]""",
+        default=numpy.array([150e-12]),
+        range=basic.Range(lo=10.0e-12, hi=500.0e-12, step=10.0e-12), # 20pF very small cell, 400pF very
+        doc="""membrane capacitance [F]""",
         order=3)
 
     V_th = arrays.FloatArray(
         label=":math:`V_{thre}`",
-        default=numpy.array([-50.0]),
-        range=basic.Range(lo=-60.0, hi=-40.0, step=0.1), 
-        doc="""AP threshold [mV]""",
+        default=numpy.array([-50.0e-3]),
+        range=basic.Range(lo=-60.0e-3, hi=-40.0e-3, step=0.1e-3),
+        doc="""AP threshold [V]""",
         order=4)
 
     tau_ref = arrays.FloatArray(
         label=r":math:`\tau_{refrec}`",
-        default=numpy.array([5.0]),
-        range=basic.Range(lo=0.1, hi=10.0, step=0.1), 
-        doc="""refractory period [ms]""",
+        default=numpy.array([5.0e-3]),
+        range=basic.Range(lo=0.1e-3, hi=10.0e-3, step=0.1e-3),
+        doc="""refractory period [s]""",
         order=5)
 
     tau_w = arrays.FloatArray(
         label=r":math:`\tau_w`",
-        default=numpy.array([500.0]),
-        range=basic.Range(lo=0.0, hi=1000.0, step=10.0), # from 0ms to 1s, sometimes you might want to remove this feature
-        doc="""adaptation time constant [ms]""",
+        default=numpy.array([500.0e-3]),
+        range=basic.Range(lo=0.0e-3, hi=1000.0e-3, step=10.0e-3), # from 0ms to 1s, sometimes you might want to remove this feature
+        doc="""adaptation time constant [s]""",
         order=6)
 
     k_a_e = arrays.FloatArray(
         label=":math:`Excitatory k_a`",
-        default=numpy.array([2.0]),
-        range=basic.Range(lo=0.0, hi=5.0, step=0.1), 
-        doc="""Excitatory sodium sharpness [mV]""",
+        default=numpy.array([2.0e-3]),
+        range=basic.Range(lo=0.0e-3, hi=5.0e-3, step=0.1e-3),
+        doc="""Excitatory sodium sharpness [V]""",
         order=7)
 
     b_e = arrays.FloatArray(
         label=":math:`Excitatory b`",
-        default=numpy.array([20.0]),
-        range=basic.Range(lo=0.0, hi=100.0, step=0.1), # here also from 0, to remove it if one wants
-        doc="""Excitatory adaptation current increment [pA]""",
+        default=numpy.array([20.0e-12]),
+        range=basic.Range(lo=0.0e-12, hi=100.0e-12, step=0.1e-12), # here also from 0, to remove it if one wants
+        doc="""Excitatory adaptation current increment [A]""",
         order=8)
 
     a_e = arrays.FloatArray(
         label=":math:`Excitatory a`",
-        default=numpy.array([4.0]),
-        range=basic.Range(lo=1.0, hi=20.0, step=0.1),
-        doc="""Excitatory adaptation conductance [nS]""",
+        default=numpy.array([4.0e-9]),
+        range=basic.Range(lo=1.0e-9, hi=20.0e-9, step=0.1e-9),
+        doc="""Excitatory adaptation conductance [S]""",
         order=9)
 
     k_a_i = arrays.FloatArray(
         label=":math:`Inhibitory k_a`",
-        default=numpy.array([0.5]),
-        range=basic.Range(lo=0.0, hi=5.0, step=0.1), 
-        doc="""Inhibitory sodium sharpness [mV]""",
+        default=numpy.array([0.5e-3]),
+        range=basic.Range(lo=0.0e-3, hi=5.0e-3, step=0.1e-3),
+        doc="""Inhibitory sodium sharpness [V]""",
         order=10)
 
     b_i = arrays.FloatArray(
         label=":math:`Inhibitory b`",
-        default=numpy.array([0.0]),
-        range=basic.Range(lo=0.0, hi=100.0, step=0.1),
-        doc="""Inhibitory adaptation current increment [pA]""",
+        default=numpy.array([0.0e-12]),
+        range=basic.Range(lo=0.0e-12, hi=100.0e-12, step=0.1e-12),
+        doc="""Inhibitory adaptation current increment [A]""",
         order=11)
 
     a_i = arrays.FloatArray(
         label=":math:`Inhibitory a`",
-        default=numpy.array([0.0]),
-        range=basic.Range(lo=0.0, hi=20.0, step=0.1),
-        doc="""Inhibitory adaptation conductance [nS]""",
+        default=numpy.array([0.0e-9]),
+        range=basic.Range(lo=0.0e-9, hi=20.0e-9, step=0.1e-9),
+        doc="""Inhibitory adaptation conductance [S]""",
         order=12)
 
     E_e = arrays.FloatArray(
         label=r":math:`E_e`",
-        default=numpy.array([0.0]),
-        range=basic.Range(lo=-20., hi=20., step=0.01),
-        doc="""excitatory reversal potential [mV]""",
+        default=numpy.array([0.0e-3]),
+        range=basic.Range(lo=-20.e-3, hi=20.e-3, step=0.01e-3),
+        doc="""excitatory reversal potential [V]""",
         order=13)
 
     E_i = arrays.FloatArray(
         label=":math:`E_i`",
-        default=numpy.array([-80.0]),
-        range=basic.Range(lo=-100.0, hi=-60.0, step=1.0), 
-        doc="""inhibitory reversal potential [mV]""",
+        default=numpy.array([-80.0e-3]),
+        range=basic.Range(lo=-100.0e-3, hi=-60.0e-3, step=1.0e-3),
+        doc="""inhibitory reversal potential [V]""",
         order=14)
 
     Q_e = arrays.FloatArray(
         label=r":math:`Q_e`",
-        default=numpy.array([1.0]),
-        range=basic.Range(lo=0.0, hi=5.0, step=0.1),
-        doc="""excitatory quantal conductance [nS]""",
+        default=numpy.array([1.0e-9]),
+        range=basic.Range(lo=0.0e-9, hi=5.0e-9, step=0.1e-9),
+        doc="""excitatory quantal conductance [S]""",
         order=15)
 
     Q_i = arrays.FloatArray(
         label=r":math:`Q_i`",
-        default=numpy.array([5.0]),
-        range=basic.Range(lo=0.0, hi=10.0, step=0.1),
-        doc="""inhibitory quantal conductance [nS]""",
+        default=numpy.array([5.0e-9]),
+        range=basic.Range(lo=0.0e-9, hi=10.0e-9, step=0.1e-9),
+        doc="""inhibitory quantal conductance [S]""",
         order=16)
 
     tau_e = arrays.FloatArray(
         label=":math:`\tau_e`",
-        default=numpy.array([5.0]),
-        range=basic.Range(lo=1.0, hi=10.0, step=1.0),
-        doc="""excitatory decay [ms]""",
+        default=numpy.array([5.0e-3]),
+        range=basic.Range(lo=1.0e-3, hi=10.0e-3, step=1.0e-3),
+        doc="""excitatory decay [s]""",
         order=17)
 
     tau_i = arrays.FloatArray(
         label=":math:`\tau_i`",
-        default=numpy.array([5.0]),
-        range=basic.Range(lo=0.5, hi=10.0, step=0.01),
-        doc="""inhibitory decay [ms]""",
+        default=numpy.array([5.0e-3]),
+        range=basic.Range(lo=0.5e-3, hi=10.0e-3, step=0.01e-3),
+        doc="""inhibitory decay [s]""",
         order=18)
 
     N_tot = arrays.IntegerArray(
