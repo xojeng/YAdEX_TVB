@@ -62,16 +62,18 @@ class Transfer_Function:
 
         # Autocorrelation-time of the fluctuations
         # Eqns 17 from [ZD_2017]
-        fe, fi = fe+np.finfo(type(fe[0])).eps, fi+np.finfo(type(fi[0])).eps # just to insure a non zero division,
-        Tv = ( fe*(Ue*Te)**2 + fi*(Ui*Ti)**2 ) /( fe*(Ue*Te)**2/(Te+Tm) + fi*(Ui*Ti)**2/(Ti+Tm) )
+        Tv_numerator = ( fe*(Ue*Te)**2 + fi*(Ui*Ti)**2 )
+        Tv_denominator = ( fe*(Ue*Te)**2/(Te+Tm) + fi*(Ui*Ti)**2/(Ti+Tm) )
+        Tv = np.divide(Tv_numerator,Tv_denominator,out=np.zeros_like(Tv_numerator),where=Tv_denominator!=0.0)
         TvN = Tv*Gl/Cm
 
-        return muV, sV+np.finfo(type(sV[0])).eps, muGn, TvN
+        return muV, sV, muGn, TvN
 
     def erfc_func(self,muV, sV, TvN, Vthre, Gl, Cm):
         # Eqns 3 from [ZD_2017]
-        return .5/TvN*Gl/Cm*\
-          sp_spec.erfc((Vthre-muV)/np.sqrt(2)/sV)
+        firs_step = np.divide((Vthre-muV)/np.sqrt(2),sV,out=np.zeros_like(Vthre),where=sV!=0.0)
+        second_step = np.divide(0.5,TvN,out=np.zeros_like(TvN),where=TvN!=0.0)
+        return second_step*Gl/Cm*sp_spec.erfc(firs_step)
 
     def threshold_func(self,muV, sV, TvN, muGn, P0, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10):
         """
