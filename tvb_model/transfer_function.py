@@ -58,12 +58,12 @@ class Transfer_Function:
         # Eqns 15 from [ZD_2017]
         sV = np.sqrt(\
                      fe*(Ue*Te)**2/2./(Te+Tm)+\
-                     fi*(Qi*Ui)**2/2./(Ti+Tm))
+                     fi*(Ui*Ti)**2/2./(Ti+Tm))
 
         # Autocorrelation-time of the fluctuations
         # Eqns 17 from [ZD_2017]
         fe, fi = fe+np.finfo(type(fe[0])).eps, fi+np.finfo(type(fi[0])).eps # just to insure a non zero division,
-        Tv = ( fe*(Ue*Te)**2 + fi*(Ti*Ui)**2 ) /( fe*(Ue*Te)**2/(Te+Tm) + fi*(Ti*Ui)**2/(Ti+Tm) )
+        Tv = ( fe*(Ue*Te)**2 + fi*(Ui*Ti)**2 ) /( fe*(Ue*Te)**2/(Te+Tm) + fi*(Ui*Ti)**2/(Ti+Tm) )
         TvN = Tv*Gl/Cm
 
         return muV, sV+np.finfo(type(sV[0])).eps, muGn, TvN
