@@ -103,9 +103,9 @@ class Zerlaut_model_first_order(Model):
     # Define traited attributes for this model, these represent possible kwargs.
     g_l = arrays.FloatArray(
         label=":math:`g_{l}`",
-        default=numpy.array([10.e-9]), # 10 nS by default, i.e. ~ 100MOhm input resitance at rest
-        range=basic.Range(lo=0.1e-9, hi=100.0e-9, step=0.1e-9), # 0.1nS would be a very small cell, 100nS a very big one
-        doc="""leak conductance [S]""",
+        default=numpy.array([10.]), # 10 nS by default, i.e. ~ 100MOhm input resitance at rest
+        range=basic.Range(lo=0.1, hi=100.0, step=0.1), # 0.1nS would be a very small cell, 100nS a very big one
+        doc="""leak conductance [nS]""",
         order=1)
 
     E_L = arrays.FloatArray(
@@ -118,9 +118,9 @@ class Zerlaut_model_first_order(Model):
     # N.B. Not independent of g_L, C_m should scale linearly with g_L
     C_m = arrays.FloatArray(
         label=":math:`C_{m}`",
-        default=numpy.array([150e-12]),
-        range=basic.Range(lo=10.0e-12, hi=500.0e-12, step=10.0e-12), # 20pF very small cell, 400pF very
-        doc="""membrane capacitance [F]""",
+        default=numpy.array([150]),
+        range=basic.Range(lo=10.0, hi=500.0, step=10.0), # 20pF very small cell, 400pF very
+        doc="""membrane capacitance [pF]""",
         order=3)
 
     V_th = arrays.FloatArray(
@@ -132,16 +132,16 @@ class Zerlaut_model_first_order(Model):
 
     tau_ref = arrays.FloatArray(
         label=r":math:`\tau_{refrec}`",
-        default=numpy.array([5.0e-3]),
-        range=basic.Range(lo=0.1e-3, hi=10.0e-3, step=0.1e-3),
-        doc="""refractory period [s]""",
+        default=numpy.array([5.0]),
+        range=basic.Range(lo=0.1, hi=10.0, step=0.1),
+        doc="""refractory period [ms]""",
         order=5)
 
     tau_w = arrays.FloatArray(
         label=r":math:`\tau_w`",
-        default=numpy.array([500.0e-3]),
-        range=basic.Range(lo=0.0e-3, hi=1000.0e-3, step=10.0e-3), # from 0ms to 1s, sometimes you might want to remove this feature
-        doc="""adaptation time constant [s]""",
+        default=numpy.array([500.0]),
+        range=basic.Range(lo=0.0, hi=1000.0, step=10.0), # from 0ms to 1s, sometimes you might want to remove this feature
+        doc="""adaptation time constant [ms]""",
         order=6)
 
     k_a_e = arrays.FloatArray(
@@ -160,9 +160,9 @@ class Zerlaut_model_first_order(Model):
 
     a_e = arrays.FloatArray(
         label=":math:`Excitatory a`",
-        default=numpy.array([4.0e-9]),
-        range=basic.Range(lo=1.0e-9, hi=20.0e-9, step=0.1e-9),
-        doc="""Excitatory adaptation conductance [S]""",
+        default=numpy.array([4.0]),
+        range=basic.Range(lo=1.0, hi=20.0, step=0.1),
+        doc="""Excitatory adaptation conductance [nS]""",
         order=9)
 
     k_a_i = arrays.FloatArray(
@@ -181,9 +181,9 @@ class Zerlaut_model_first_order(Model):
 
     a_i = arrays.FloatArray(
         label=":math:`Inhibitory a`",
-        default=numpy.array([0.0e-9]),
-        range=basic.Range(lo=0.0e-9, hi=20.0e-9, step=0.1e-9),
-        doc="""Inhibitory adaptation conductance [S]""",
+        default=numpy.array([0.0]),
+        range=basic.Range(lo=0.0, hi=20.0, step=0.1),
+        doc="""Inhibitory adaptation conductance [nS]""",
         order=12)
 
     E_e = arrays.FloatArray(
@@ -202,30 +202,30 @@ class Zerlaut_model_first_order(Model):
 
     Q_e = arrays.FloatArray(
         label=r":math:`Q_e`",
-        default=numpy.array([1.0e-9]),
-        range=basic.Range(lo=0.0e-9, hi=5.0e-9, step=0.1e-9),
-        doc="""excitatory quantal conductance [S]""",
+        default=numpy.array([1.0]),
+        range=basic.Range(lo=0.0, hi=5.0, step=0.1),
+        doc="""excitatory quantal conductance [nS]""",
         order=15)
 
     Q_i = arrays.FloatArray(
         label=r":math:`Q_i`",
-        default=numpy.array([5.0e-9]),
-        range=basic.Range(lo=0.0e-9, hi=10.0e-9, step=0.1e-9),
-        doc="""inhibitory quantal conductance [S]""",
+        default=numpy.array([5.0]),
+        range=basic.Range(lo=0.0, hi=10.0, step=0.1),
+        doc="""inhibitory quantal conductance [nS]""",
         order=16)
 
     tau_e = arrays.FloatArray(
         label=":math:`\tau_e`",
-        default=numpy.array([5.0e-3]),
-        range=basic.Range(lo=1.0e-3, hi=10.0e-3, step=1.0e-3),
-        doc="""excitatory decay [s]""",
+        default=numpy.array([5.0]),
+        range=basic.Range(lo=1.0, hi=10.0, step=1.0),
+        doc="""excitatory decay [ms]""",
         order=17)
 
     tau_i = arrays.FloatArray(
         label=":math:`\tau_i`",
-        default=numpy.array([5.0e-3]),
-        range=basic.Range(lo=0.5e-3, hi=10.0e-3, step=0.01e-3),
-        doc="""inhibitory decay [s]""",
+        default=numpy.array([5.0]),
+        range=basic.Range(lo=0.5, hi=10.0, step=0.01),
+        doc="""inhibitory decay [ms]""",
         order=18)
 
     N_tot = arrays.IntegerArray(

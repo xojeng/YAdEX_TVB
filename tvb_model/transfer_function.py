@@ -133,10 +133,10 @@ if __name__=='__main__':
     TF = Transfer_Function(model, model.P_e, model.P_i)
 
     fig, [axE, axI] = plt.subplots(1, 2, figsize=(8,4))
-    fe, fi = np.linspace(0., 20.), np.linspace(0., 20.)
+    fe, fi = np.linspace(0., 20.)/1000.0, np.linspace(0., 20.)/1000.0
     for i in range(len(fi)):
-        axE.plot(fe, TF.excitatory(fe, fi[i]), color=viridis(i/len(fi)))
-        axI.plot(fe, TF.inhibitory(fe, fi[i]), color=viridis(i/len(fi)))
+        axE.plot(fe, TF.excitatory(fe, fi[i])*1000.0, color=viridis(i/len(fi)))
+        axI.plot(fe, TF.inhibitory(fe, fi[i])*1000.0, color=viridis(i/len(fi)))
     axE.set_title('exc. TF')
     axI.set_title('inh. TF')
 
