@@ -80,8 +80,8 @@ class Transfer_Function:
         in the case of a linear threshold
         """
         # Normalization factors pag. 5 after the equation 4
-        muV0, DmuV0 = -60e-3,10e-3
-        sV0, DsV0 =4e-3, 6e-3
+        muV0, DmuV0 = -60.0,10.0
+        sV0, DsV0 =4.0, 6.0
         TvN0, DTvN0 = 0.5, 1.
 
         # Eqns 4 from [ZD_2017]
@@ -96,7 +96,7 @@ class Transfer_Function:
     def TF_my_template(self,fe, fi, Qe, Te, Ee, Qi, Ti, Ei, Gl, Cm, El, Ntot, pconnec, gei, P0, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10):
         # here TOTAL (sum over synapses) excitatory and inhibitory input
         muV, sV, muGn, TvN = self.get_fluct_regime_vars(fe, fi, Qe, Te, Ee, Qi, Ti, Ei, Gl, Cm, El, Ntot, pconnec, gei, P0, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10)
-        Vthre = self.threshold_func(muV, sV, TvN, muGn, P0, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10)
+        Vthre = self.threshold_func(muV, sV, TvN, muGn, P0, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10)*1e3 # the threshold need to be in mv and not in Volt
         Fout_th = self.erfc_func(muV, sV, TvN, Vthre, Gl, Cm)
         return Fout_th
 
@@ -135,10 +135,9 @@ if __name__=='__main__':
     fig, [axE, axI] = plt.subplots(1, 2, figsize=(8,4))
     fe, fi = np.linspace(0., 20.)/1000.0, np.linspace(0., 20.)/1000.0
     for i in range(len(fi)):
-        axE.plot(fe, TF.excitatory(fe, fi[i])*1000.0, color=viridis(i/len(fi)))
-        axI.plot(fe, TF.inhibitory(fe, fi[i])*1000.0, color=viridis(i/len(fi)))
+        axE.plot(fe*1000.0, TF.excitatory(fe, fi[i])*1000.0, color=viridis(i/len(fi)))
+        axI.plot(fe*1000.0, TF.inhibitory(fe, fi[i])*1000.0, color=viridis(i/len(fi)))
     axE.set_title('exc. TF')
     axI.set_title('inh. TF')
-
     plt.show()
     

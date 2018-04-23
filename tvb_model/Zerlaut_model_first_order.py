@@ -110,9 +110,9 @@ class Zerlaut_model_first_order(Model):
 
     E_L = arrays.FloatArray(
         label=":math:`E_{L}`",
-        default=numpy.array([-65.0e-3]),
-        range=basic.Range(lo=-90.0e-3, hi=-60.0e-3, step=0.1e-3), # resting potential, usually between -85mV and -65mV
-        doc="""leak reversal potential [V]""",
+        default=numpy.array([-65.0]),
+        range=basic.Range(lo=-90.0, hi=-60.0, step=0.1), # resting potential, usually between -85mV and -65mV
+        doc="""leak reversal potential [mV]""",
         order=2)
 
     # N.B. Not independent of g_L, C_m should scale linearly with g_L
@@ -125,9 +125,9 @@ class Zerlaut_model_first_order(Model):
 
     V_th = arrays.FloatArray(
         label=":math:`V_{thre}`",
-        default=numpy.array([-50.0e-3]),
-        range=basic.Range(lo=-60.0e-3, hi=-40.0e-3, step=0.1e-3),
-        doc="""AP threshold [V]""",
+        default=numpy.array([-50.0]),
+        range=basic.Range(lo=-60.0, hi=-40.0, step=0.1),
+        doc="""AP threshold [mV]""",
         order=4)
 
     tau_ref = arrays.FloatArray(
@@ -146,16 +146,16 @@ class Zerlaut_model_first_order(Model):
 
     k_a_e = arrays.FloatArray(
         label=":math:`Excitatory k_a`",
-        default=numpy.array([2.0e-3]),
-        range=basic.Range(lo=0.0e-3, hi=5.0e-3, step=0.1e-3),
-        doc="""Excitatory sodium sharpness [V]""",
+        default=numpy.array([2.0]),
+        range=basic.Range(lo=0.0, hi=5.0, step=0.1),
+        doc="""Excitatory sodium sharpness [mV]""",
         order=7)
 
     b_e = arrays.FloatArray(
         label=":math:`Excitatory b`",
-        default=numpy.array([20.0e-12]),
-        range=basic.Range(lo=0.0e-12, hi=100.0e-12, step=0.1e-12), # here also from 0, to remove it if one wants
-        doc="""Excitatory adaptation current increment [A]""",
+        default=numpy.array([20.0]),
+        range=basic.Range(lo=0.0, hi=100.0, step=0.1), # here also from 0, to remove it if one wants
+        doc="""Excitatory adaptation current increment [pA]""",
         order=8)
 
     a_e = arrays.FloatArray(
@@ -167,16 +167,16 @@ class Zerlaut_model_first_order(Model):
 
     k_a_i = arrays.FloatArray(
         label=":math:`Inhibitory k_a`",
-        default=numpy.array([0.5e-3]),
-        range=basic.Range(lo=0.0e-3, hi=5.0e-3, step=0.1e-3),
-        doc="""Inhibitory sodium sharpness [V]""",
+        default=numpy.array([0.5]),
+        range=basic.Range(lo=0.0, hi=5.0, step=0.1),
+        doc="""Inhibitory sodium sharpness [mV]""",
         order=10)
 
     b_i = arrays.FloatArray(
         label=":math:`Inhibitory b`",
-        default=numpy.array([0.0e-12]),
-        range=basic.Range(lo=0.0e-12, hi=100.0e-12, step=0.1e-12),
-        doc="""Inhibitory adaptation current increment [A]""",
+        default=numpy.array([0.0]),
+        range=basic.Range(lo=0.0, hi=100.0, step=0.1),
+        doc="""Inhibitory adaptation current increment [pA]""",
         order=11)
 
     a_i = arrays.FloatArray(
@@ -188,16 +188,16 @@ class Zerlaut_model_first_order(Model):
 
     E_e = arrays.FloatArray(
         label=r":math:`E_e`",
-        default=numpy.array([0.0e-3]),
-        range=basic.Range(lo=-20.e-3, hi=20.e-3, step=0.01e-3),
-        doc="""excitatory reversal potential [V]""",
+        default=numpy.array([0.0]),
+        range=basic.Range(lo=-20., hi=20., step=0.01),
+        doc="""excitatory reversal potential [mV]""",
         order=13)
 
     E_i = arrays.FloatArray(
         label=":math:`E_i`",
-        default=numpy.array([-80.0e-3]),
-        range=basic.Range(lo=-100.0e-3, hi=-60.0e-3, step=1.0e-3),
-        doc="""inhibitory reversal potential [V]""",
+        default=numpy.array([-80.0]),
+        range=basic.Range(lo=-100.0, hi=-60.0, step=1.0),
+        doc="""inhibitory reversal potential [mV]""",
         order=14)
 
     Q_e = arrays.FloatArray(
