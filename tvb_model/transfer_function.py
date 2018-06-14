@@ -25,14 +25,12 @@ class Transfer_Function:
             P = [-45e-3]
             for i in range(1,11):
                 P.append(0)
-                
-        # return params['__Q_e'], params['__tau_e'], params['__E_e'], params['__Q_i'], params['__tau_i'], params['__E_i'], params['__g_l'], \
-        #        params['__C_m'], params['__E_L'], params['__N_tot'], params['__p_connect'], params['__g'], P[0], P[1], P[2], P[3], P[4], P[5], P[6], P[7], P[8], P[9], P[10]
+
         return self.model.Q_e, self.model.tau_e, self.model.E_e, self.model.Q_i, self.model.tau_i, self.model.E_i, self.model.g_l, \
                self.model.C_m, self.model.E_L, self.model.N_tot, self.model.p_connect, self.model.g, P[0], P[1], P[2], P[3], P[4], P[5], P[6], P[7], P[8], P[9], P[10]
 
 
-    def get_fluct_regime_vars(self,Fe, Fi, Qe, Te, Ee, Qi, Ti, Ei, Gl, Cm, El, Ntot, pconnec, gei, P0, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10):
+    def get_fluct_regime_vars(self,Fe, Fi, Qe, Te, Ee, Qi, Ti, Ei, Gl, Cm, El, Ntot, pconnec, gei):
         # here TOTAL (sum over synapses) excitatory and inhibitory input
 
         #firing rate
@@ -56,7 +54,7 @@ class Transfer_Function:
 
         # Standard deviation of the fluctuations
         # Eqns 15 from [ZD_2017]
-        sV = np.sqrt(\
+        sV = np.sqrt(
                      fe*(Ue*Te)**2/2./(Te+Tm)+\
                      fi*(Ui*Ti)**2/2./(Ti+Tm))
 
@@ -64,16 +62,14 @@ class Transfer_Function:
         # Eqns 17 from [ZD_2017]
         Tv_numerator = ( fe*(Ue*Te)**2 + fi*(Ui*Ti)**2 )
         Tv_denominator = ( fe*(Ue*Te)**2/(Te+Tm) + fi*(Ui*Ti)**2/(Ti+Tm) )
-        Tv = np.divide(Tv_numerator,Tv_denominator,out=np.zeros_like(Tv_numerator),where=Tv_denominator!=0.0)
-        TvN = Tv*Gl/Cm
+        TvN = np.divide(Tv_numerator,Tv_denominator,out=np.zeros_like(Tv_numerator),where=Tv_denominator!=0.0)
 
         return muV, sV, muGn, TvN
 
-    def erfc_func(self,muV, sV, TvN, Vthre, Gl, Cm):
+    def erfc_func(self,muV, sV, TvN, Vthre):
         # Eqns 3 from [ZD_2017]
         firs_step = np.divide((Vthre-muV)/np.sqrt(2),sV,out=np.zeros_like(Vthre),where=sV!=0.0)
-        second_step = np.divide(0.5,TvN,out=np.zeros_like(TvN),where=TvN!=0.0)
-        return second_step*Gl/Cm*sp_spec.erfc(firs_step)
+        return np.divide(sp_spec.erfc(firs_step)*0.5,TvN,out=np.zeros_like(TvN),where=TvN!=0.0)
 
     def threshold_func(self,muV, sV, TvN, muGn, P0, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10):
         """
@@ -85,21 +81,27 @@ class Transfer_Function:
         muV0, DmuV0 = -60.0,10.0
         sV0, DsV0 =4.0, 6.0
         TvN0, DTvN0 = 0.5, 1.
-
+        V = (muV-muV0)/DmuV0
+        S = (sV-sV0)/DsV0
+        T = (TvN-TvN0)/DTvN0
         # Eqns 4 from [ZD_2017]
-        return P0+P1*(muV-muV0)/DmuV0+\
-            P2*(sV-sV0)/DsV0+P3*(TvN-TvN0)/DTvN0+\
-            P4*np.log(muGn)+P5*((muV-muV0)/DmuV0)**2+\
-            P6*((sV-sV0)/DsV0)**2+P7*((TvN-TvN0)/DTvN0)**2+\
-            P8*(muV-muV0)/DmuV0*(sV-sV0)/DsV0+\
-            P9*(muV-muV0)/DmuV0*(TvN-TvN0)/DTvN0+\
-            P10*(sV-sV0)/DsV0*(TvN-TvN0)/DTvN0
+        return  P0\
+                +P1*V\
+                +P2*S\
+                +P3*T\
+                +P4*np.log(muGn)\
+                +P5*V**2\
+                +P6*S**2\
+                +P7*T**2\
+                +P8*V*S\
+                +P9*V*T\
+                +P10*S*T
 
     def TF_my_template(self,fe, fi, Qe, Te, Ee, Qi, Ti, Ei, Gl, Cm, El, Ntot, pconnec, gei, P0, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10):
         # here TOTAL (sum over synapses) excitatory and inhibitory input
-        muV, sV, muGn, TvN = self.get_fluct_regime_vars(fe, fi, Qe, Te, Ee, Qi, Ti, Ei, Gl, Cm, El, Ntot, pconnec, gei, P0, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10)
-        Vthre = self.threshold_func(muV, sV, TvN, muGn, P0, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10)*1e3 # the threshold need to be in mv and not in Volt
-        Fout_th = self.erfc_func(muV, sV, TvN, Vthre, Gl, Cm)
+        muV, sV, muGn, Tv = self.get_fluct_regime_vars(fe, fi, Qe, Te, Ee, Qi, Ti, Ei, Gl, Cm, El, Ntot, pconnec, gei)
+        Vthre = self.threshold_func(muV, sV, Tv*Gl/Cm, muGn, P0, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10)*1e3 # the threshold need to be in mv and not in Volt
+        Fout_th = self.erfc_func(muV, sV, Tv, Vthre)
         return Fout_th
 
     def excitatory (self,fe, fi):
