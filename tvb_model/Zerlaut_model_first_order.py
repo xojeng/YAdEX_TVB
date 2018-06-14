@@ -287,15 +287,15 @@ class Zerlaut_model_first_order(Model):
     # Used for phase-plane axis ranges and to bound random initial() conditions.
     state_variable_range = basic.Dict(
         label="State Variable ranges [lo, hi]",
-        default={"E": numpy.array([0.01, 200.0]), # actually the 200Hz should be replaced by 1/T_refrac, but let's take that
-                 "I": numpy.array([0.01, 200.0])},
+        default={"E": numpy.array([0.00001, 0.250]), # actually the 200Hz should be replaced by 1/T_refrac, but let's take that
+                 "I": numpy.array([0.00001, 0.250])},
         doc="""The values for each state-variable should be set to encompass
         the expected dynamic range of that state-variable for the current
         parameters, it is used as a mechanism for bounding random inital
         conditions when the simulation isn't started from an explicit history,
         it is also provides the default range of phase-plane plots.\n
-        E: firing rate of excitatory population\n
-        I: firing rate of inhibitory population
+        E: firing rate of excitatory population in KHz\n
+        I: firing rate of inhibitory population in kHz
         """,
         order=23)
 
@@ -321,8 +321,8 @@ class Zerlaut_model_first_order(Model):
             T \dot{\nu_\mu} &= -F_\mu(\nu_e,\nu_i) + \nu_\mu ,\all\mu\in\{e,i\}
 
         """
-        #this variable can be internal varible for optimization
-        TF = Transfer_Function(vars(self),self.P_e,self.P_i)
+        #this variable can be internal variable for optimization
+        TF = Transfer_Function(self,self.P_e,self.P_i)
 
         E = state_variables[0, :]
         I = state_variables[1, :]
@@ -335,13 +335,12 @@ class Zerlaut_model_first_order(Model):
         lc_E = local_coupling * E
         lc_I = local_coupling * I
 
-
         #equation is inspired from github of Zerlaut :
         # https://bitbucket.org/yzerlaut/mean_field_for_multi_input_integration
         # ./mean_field/master_equation.py
         # Excitatory firing rate derivation
         derivative[0] = 1./self.T*(TF.excitatory(E+c_0+lc_E, I+lc_I)-E) #TODO : need to check the accuracy of the equation
         # Inhibitory firing rate derivation
-        derivative[1] = 1./self.T*(TF.inhibitory(E+lc_E, I+lc_I)-I) #TODO : need to check the accuracy of the equation
+        derivative[1] = 1./self.T*(TF.inhibitory(E+c_0+lc_E, I+lc_I)-I) #TODO : need to check the accuracy of the equation
 
         return derivative
