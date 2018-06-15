@@ -293,9 +293,9 @@ class Zerlaut_model_second_order(Model):
         label="State Variable ranges [lo, hi]",
         default={"E": numpy.array([0.00001, 0.200]), # actually the 200Hz should be replaced by 1/T_refrac, but let's take that
                  "I": numpy.array([0.00001, 0.200]),
-                 "C_ee":numpy.array([-0.00002, 0.00002]), #TODO need to define the range
-                 "C_ei":numpy.array([-0.00002, 0.00002]), #TODO need to define the range
-                 "C_ii":numpy.array([-0.00002, 0.00002]) #TODO need to define the range
+                 "C_ee":numpy.array([0.00, 0.00]), # variance is positive or null
+                 "C_ei":numpy.array([-0.00, 0.00]), # the co-variance is in [-c_ee*c_ii,c_ee*c_ii]
+                 "C_ii":numpy.array([0.00, 0.00]) # variance is positive or null
                  },
         doc="""The values for each state-variable should be set to encompass
         the expected dynamic range of that state-variable for the current
@@ -323,7 +323,7 @@ class Zerlaut_model_second_order(Model):
 
     state_variables = 'E I C_ee C_ei C_ii'.split()
     _nvar = 5
-    cvar = numpy.array([0, 1], dtype=numpy.int32)
+    cvar = numpy.array([0,1,2,3,4], dtype=numpy.int32)
 
     def dfun(self, state_variables, coupling, local_coupling=0.05):
         r"""
@@ -417,7 +417,7 @@ class Zerlaut_model_second_order(Model):
 
     def _diff2_fe_fe(self,TF, fe, fi):
         df = 10**(numpy.log10(fe)-4)
-        return (self._diff_fe(TF, fe+df, fi)-2* self._diff_fe(TF,fe,fi)+self._diff_fe(TF, fe-df, fi))/(df**2)
+        return (TF(fe+df, fi)-2*TF(fe,fi)+TF(fe-df, fi))/(df**2)
 
     def _diff2_fi_fe(self,TF, fe, fi):
         df = 10**(numpy.log10(fe)-4)
@@ -429,4 +429,4 @@ class Zerlaut_model_second_order(Model):
 
     def _diff2_fi_fi(self,TF, fe, fi):
         df = 10**(numpy.log10(fi)-4)
-        return (self._diff_fi(TF, fe, fi+df)-2*self._diff_fi(TF, fe, fi)+self._diff_fi(TF,fe, fi-df))/(df**2)
+        return (TF(fe, fi+df)-2*TF(fe, fi)+TF(fe, fi-df))/(df**2)

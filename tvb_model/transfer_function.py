@@ -57,6 +57,8 @@ class Transfer_Function:
         sV = np.sqrt(
                      fe*(Ue*Te)**2/2./(Te+Tm)+\
                      fi*(Ui*Ti)**2/2./(Ti+Tm))
+        if  any((fe*(Ue*Te)**2/2./(Te+Tm)+fi*(Ui*Ti)**2/2./(Ti+Tm)) <= 0):
+            print('Error in the firing rate')
 
         # Autocorrelation-time of the fluctuations
         # Eqns 17 from [ZD_2017]
