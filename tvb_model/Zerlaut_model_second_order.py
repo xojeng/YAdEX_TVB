@@ -384,10 +384,10 @@ class Zerlaut_model_second_order(Model):
         derivative[3] = 1./self.T*\
                 ((TF.excitatory(E+c_0+lc_E, I+lc_I)-E)*\
                 (TF.inhibitory(E+c_0+lc_E, I+lc_I)-I)+\
-                C_ee*self._diff_fe(TF.inhibitory, E+c_0+lc_E, I+lc_I)+\
-                C_ei*self._diff_fe(TF.excitatory, E+c_0+lc_E, I+lc_I)+\
-                C_ei*self._diff_fi(TF.inhibitory, E+c_0+lc_E, I+lc_I)+\
-                C_ii*self._diff_fi(TF.excitatory, E+c_0+lc_E, I+lc_I)+\
+                C_ee*self._diff_fe(TF.excitatory, E+c_0+lc_E, I+lc_I)+\
+                C_ei*self._diff_fe(TF.inhibitory, E+c_0+lc_E, I+lc_I)+\
+                C_ei*self._diff_fi(TF.excitatory, E+c_0+lc_E, I+lc_I)+\
+                C_ii*self._diff_fi(TF.inhibitory, E+c_0+lc_E, I+lc_I)+\
                 -2.*C_ei)
 
         #Covariance inhibitory-inhibitory derivation
