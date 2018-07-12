@@ -34,8 +34,8 @@ class Transfer_Function:
         # here TOTAL (sum over synapses) excitatory and inhibitory input
 
         #firing rate
-        fe = Fe*(1.-gei)*pconnec*Ntot # default is 1 !!
-        fi = Fi*gei*pconnec*Ntot
+        fe = (Fe+ 1e-7)*(1.-gei)*pconnec*Ntot  # default is 1 # add 1e-7 in order to avoid numerical error in the calculation of derivation of transfert function == noise
+        fi = (Fi+ 1e-7)*gei*pconnec*Ntot        # add 1e-7 in order to avoid numerical error in the calculation of derivation of transfert function == noise
 
         # conductance fluctuation
         # Eqns 5 from [ZD_2017]
@@ -57,22 +57,21 @@ class Transfer_Function:
         sV = np.sqrt(
                      fe*(Ue*Te)**2/2./(Te+Tm)+\
                      fi*(Ui*Ti)**2/2./(Ti+Tm))
-        if  any((fe*(Ue*Te)**2/2./(Te+Tm)+fi*(Ui*Ti)**2/2./(Ti+Tm)) <= 0):
-            # print('Error in the firing rate')
-            pass
+        if  any((fe*(Ue*Te)**2/2./(Te+Tm)+fi*(Ui*Ti)**2/2./(Ti+Tm)) < 0):
+            print('Error in the firing rate')
+            # pass
 
         # Autocorrelation-time of the fluctuations
         # Eqns 17 from [ZD_2017]
         Tv_numerator = ( fe*(Ue*Te)**2 + fi*(Ui*Ti)**2 )
         Tv_denominator = ( fe*(Ue*Te)**2/(Te+Tm) + fi*(Ui*Ti)**2/(Ti+Tm) )
-        TvN = np.divide(Tv_numerator,Tv_denominator,out=np.zeros_like(Tv_numerator),where=Tv_denominator!=0.0)
+        TvN = np.divide(Tv_numerator,Tv_denominator,out=np.ones_like(Tv_numerator),where=Tv_denominator!=0.0)
 
-        return muV, sV, muGn, TvN
+        return muV, sV + 1e-9, muGn, TvN #add 1e9  to sV to avoid to divid by zero and represent external noise
 
     def erfc_func(self,muV, sV, TvN, Vthre):
         # Eqns 3 from [ZD_2017]
-        firs_step = np.divide((Vthre-muV)/np.sqrt(2),sV,out=np.zeros_like(Vthre),where=sV!=0.0)
-        return np.divide(sp_spec.erfc(firs_step)*0.5,TvN,out=np.zeros_like(TvN),where=TvN!=0.0)
+        return sp_spec.erfc((Vthre-muV)/np.sqrt(2)/sV)*0.5/TvN
 
     def threshold_func(self,muV, sV, TvN, muGn, P0, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10):
         """
@@ -114,8 +113,6 @@ class Transfer_Function:
         :param fi: firing rate of inhibitory population
         :return: result of transfert function
         """
-        fi[np.where(fi < 0.0)] = 0.0
-        fe[np.where(fe < 0.0)] = 0.0
         result = self.TF_my_template(fe, fi, *self.pseq_params(self.P_e))
         return result
 
@@ -126,8 +123,6 @@ class Transfer_Function:
         :param fi: firing rate of inhibitory population
         :return: result of transfert function
         """
-        fe[np.where(fe < 0.0)] = 0.0
-        fi[np.where(fi < 0.0)] = 0.0
         result = self.TF_my_template(fe, fi, *self.pseq_params(self.P_i))
         return result
 

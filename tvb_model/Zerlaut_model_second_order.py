@@ -283,9 +283,9 @@ class Zerlaut_model_second_order(Model):
     external_input = arrays.FloatArray(
         label=":math:`\nu_e^{drive}`",
         default=numpy.array([0.0]),
-        range=basic.Range(lo=0.0, hi=0.1, step=0.001),
+        range=basic.Range(lo=1e-8, hi=0.1, step=0.001),
         doc="""external drive""",
-        order=22)
+        order=23)
 
 
     # Used for phase-plane axis ranges and to bound random initial() conditions.
@@ -308,7 +308,7 @@ class Zerlaut_model_second_order(Model):
         C_ei: the covariance between the excitatory and inhibitory population activities (always symetric) \n
         C_ie: the variance of the inhibitory population activity 
         """,
-        order=25)
+        order=24)
 
     variables_of_interest = basic.Enumerate(
         label="Variables watched by Monitors",
@@ -319,7 +319,7 @@ class Zerlaut_model_second_order(Model):
                monitored. It can be overridden for each Monitor if desired. The
                corresponding state-variable indices for this model are :math:`E = 0`,
                :math:`I = 1`, :math:`C_ee = 2`, :math:`C_ei = 3`, :math:`C_ii = 4`.""",
-        order=26)
+        order=25)
 
     state_variables = 'E I C_ee C_ei C_ii'.split()
     _nvar = 5

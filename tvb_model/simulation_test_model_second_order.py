@@ -33,7 +33,7 @@ raw_time = []
 tavg_data = []
 tavg_time = []
 
-for raw, tavg in sim(simulation_length=2 ** 7):
+for raw, tavg in sim(simulation_length=2 ** 8):
     print("time",raw[0],"raw : ",np.mean(raw[1][0]),np.mean(raw[1][1]),np.mean(raw[1][2]),np.mean(raw[1][3]),np.mean(raw[1][4]))
     if not raw is None:
         raw_time.append(raw[0])
