@@ -58,7 +58,8 @@ class Transfer_Function:
                      fe*(Ue*Te)**2/2./(Te+Tm)+\
                      fi*(Ui*Ti)**2/2./(Ti+Tm))
         if  any((fe*(Ue*Te)**2/2./(Te+Tm)+fi*(Ui*Ti)**2/2./(Ti+Tm)) <= 0):
-            print('Error in the firing rate')
+            # print('Error in the firing rate')
+            pass
 
         # Autocorrelation-time of the fluctuations
         # Eqns 17 from [ZD_2017]
@@ -113,7 +114,10 @@ class Transfer_Function:
         :param fi: firing rate of inhibitory population
         :return: result of transfert function
         """
-        return self.TF_my_template(fe, fi, *self.pseq_params(self.P_e))
+        fi[np.where(fi < 0.0)] = 0.0
+        fe[np.where(fe < 0.0)] = 0.0
+        result = self.TF_my_template(fe, fi, *self.pseq_params(self.P_e))
+        return result
 
     def inhibitory (self,fe, fi):
         """
@@ -122,7 +126,10 @@ class Transfer_Function:
         :param fi: firing rate of inhibitory population
         :return: result of transfert function
         """
-        return self.TF_my_template(fe, fi, *self.pseq_params(self.P_i))
+        fe[np.where(fe < 0.0)] = 0.0
+        fi[np.where(fi < 0.0)] = 0.0
+        result = self.TF_my_template(fe, fi, *self.pseq_params(self.P_i))
+        return result
 
 
 if __name__=='__main__':
