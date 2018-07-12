@@ -287,8 +287,8 @@ class Zerlaut_model_first_order(Model):
     # Used for phase-plane axis ranges and to bound random initial() conditions.
     state_variable_range = basic.Dict(
         label="State Variable ranges [lo, hi]",
-        default={"E": numpy.array([0.00001, 0.200]), # actually the 200Hz should be replaced by 1/T_refrac, but let's take that
-                 "I": numpy.array([0.00001, 0.200])},
+        default={"E": numpy.array([0.00001, 0.1]), # actually the 200Hz should be replaced by 1/T_refrac, but let's take that
+                 "I": numpy.array([0.00001, 0.1])},
         doc="""The values for each state-variable should be set to encompass
         the expected dynamic range of that state-variable for the current
         parameters, it is used as a mechanism for bounding random inital
@@ -314,7 +314,7 @@ class Zerlaut_model_first_order(Model):
     _nvar = 2
     cvar = numpy.array([0, 1], dtype=numpy.int32)
 
-    def dfun(self, state_variables, coupling, local_coupling=0.05):
+    def dfun(self, state_variables, coupling, local_coupling=0.00):
         r"""
 
         .. math::
@@ -339,8 +339,8 @@ class Zerlaut_model_first_order(Model):
         # https://bitbucket.org/yzerlaut/mean_field_for_multi_input_integration
         # ./mean_field/master_equation.py
         # Excitatory firing rate derivation
-        derivative[0] = 1./self.T*(TF.excitatory(E+c_0+lc_E, I+lc_I)-E) #TODO : need to check the accuracy of the equation
+        derivative[0] = (TF.excitatory(E+c_0+lc_E, I+lc_I)-E)/self.T #TODO : need to check the accuracy of the equation
         # Inhibitory firing rate derivation
-        derivative[1] = 1./self.T*(TF.inhibitory(E+c_0+lc_E, I+lc_I)-I) #TODO : need to check the accuracy of the equation
+        derivative[1] = (TF.inhibitory(E, I+lc_I)-I)/self.T #TODO : need to check the accuracy of the equation
 
         return derivative

@@ -2,7 +2,7 @@
 Mean field model based on Master equation about adaptative exponential leacky integrate and fire neurons population
 """
 
-from tvb.simulator.models.base import Model, LOG, numpy, basic, arrays, core
+from tvb.simulator.models.base import Model, LOG, numpy, basic, arrays
 from transfer_function import Transfer_Function
 
 class Zerlaut_model_second_order(Model):
@@ -14,7 +14,7 @@ class Zerlaut_model_second_order(Model):
 
     #TODO : need to describe a little bit the connectivity between the two populations
 
-    The default parameters are taken from table 1 of [ZD_20107]_, pag.3
+    The default parameters are taken from table 1 of [ZD_2018]_, pag.3
     +---------------------------+------------+
     |                 Table 1                |
     +--------------+------------+------------+
@@ -92,7 +92,7 @@ class Zerlaut_model_second_order(Model):
 
     """
     _ui_name = "Zerlaut_model_2"
-    ui_configurable_parameters = ['c_ee', 'c_ei', 'c_ie', 'c_ii', 'tau_e', 'tau_i',
+    ui_configurable_parameters = ['tau_e', 'tau_i',
                                   'a_e', 'b_e', 'c_e', 'a_i', 'b_i', 'c_i', 'r_e',
                                   'r_i', 'k_e', 'k_i', 'P', 'Q', 'theta_e', 'theta_i',
                                   'alpha_e', 'alpha_i']
@@ -256,7 +256,7 @@ class Zerlaut_model_second_order(Model):
     T = arrays.FloatArray(
         label=":math:`T`",
         default=numpy.array([5.0]),
-        range=basic.Range(lo=1., hi=20.0, step=0.1),
+        range=basic.Range(lo=1.0, hi=20.0, step=0.1),
         doc="""time scale of describing network activity""",
         order=22)
 
@@ -291,11 +291,11 @@ class Zerlaut_model_second_order(Model):
     # Used for phase-plane axis ranges and to bound random initial() conditions.
     state_variable_range = basic.Dict(
         label="State Variable ranges [lo, hi]",
-        default={"E": numpy.array([0.00001, 0.200]), # actually the 200Hz should be replaced by 1/T_refrac, but let's take that
-                 "I": numpy.array([0.00001, 0.200]),
-                 "C_ee":numpy.array([0.00, 0.00]), # variance is positive or null
-                 "C_ei":numpy.array([-0.00, 0.00]), # the co-variance is in [-c_ee*c_ii,c_ee*c_ii]
-                 "C_ii":numpy.array([0.00, 0.00]) # variance is positive or null
+        default={"E": numpy.array([0.0001, 0.1]), # actually the 200Hz should be replaced by 1/T_refrac, but let's take that
+                 "I": numpy.array([0.0001, 0.1]),
+                 "C_ee":numpy.array([0.0, 0.0]), # variance is positive or null
+                 "C_ei":numpy.array([0.0, 0.0]), # the co-variance is in [-c_ee*c_ii,c_ee*c_ii]
+                 "C_ii":numpy.array([0.0, 0.0]) # variance is positive or null
                  },
         doc="""The values for each state-variable should be set to encompass
         the expected dynamic range of that state-variable for the current
@@ -325,7 +325,7 @@ class Zerlaut_model_second_order(Model):
     _nvar = 5
     cvar = numpy.array([0,1,2,3,4], dtype=numpy.int32)
 
-    def dfun(self, state_variables, coupling, local_coupling=0.05):
+    def dfun(self, state_variables, coupling, local_coupling=0.00):
         r"""
 
         .. math::
@@ -365,18 +365,18 @@ class Zerlaut_model_second_order(Model):
                 TF.excitatory(E+c_0+lc_E, I+lc_I)-E)
         #Inhibitory firing rate derivation
         derivative[1] = 1./self.T*(\
-                .5*C_ee*self._diff2_fe_fe(TF.inhibitory, E+c_0+lc_E, I+lc_I)+\
-                .5*C_ei*self._diff2_fe_fi(TF.inhibitory, E+c_0+lc_E, I+lc_I)+\
-                .5*C_ei*self._diff2_fi_fe(TF.inhibitory, E+c_0+lc_E, I+lc_I)+\
-                .5*C_ii*self._diff2_fi_fi(TF.inhibitory, E+c_0+lc_E, I+lc_I)+\
-                TF.inhibitory(E+c_0+lc_E, I+lc_I)-I)
+                .5*C_ee*self._diff2_fe_fe(TF.inhibitory, E, I+lc_I)+\
+                .5*C_ei*self._diff2_fe_fi(TF.inhibitory, E, I+lc_I)+\
+                .5*C_ei*self._diff2_fi_fe(TF.inhibitory, E, I+lc_I)+\
+                .5*C_ii*self._diff2_fi_fi(TF.inhibitory, E, I+lc_I)+\
+                TF.inhibitory(E, I+lc_I)-I)
         #Covariance excitatory-excitatory derivation
         derivative[2] = 1./self.T*(\
                 1./Ne*TF.excitatory(E+c_0+lc_E, I+lc_I)*\
                 (1./self.T-TF.excitatory(E+c_0+lc_E, I+lc_I))+\
                 (TF.excitatory(E+c_0+lc_E, I+lc_I)-E)**2+\
                 2.*C_ee*self._diff_fe(TF.excitatory, E+c_0+lc_E, I+lc_I)+\
-                2.*C_ei*self._diff_fi(TF.inhibitory, E+c_0+lc_E, I+lc_I)+\
+                2.*C_ei*self._diff_fi(TF.inhibitory, E, I+lc_I)+\
                 -2.*C_ee)
 
 
@@ -385,17 +385,17 @@ class Zerlaut_model_second_order(Model):
                 ((TF.excitatory(E+c_0+lc_E, I+lc_I)-E)*\
                 (TF.inhibitory(E+c_0+lc_E, I+lc_I)-I)+\
                 C_ee*self._diff_fe(TF.excitatory, E+c_0+lc_E, I+lc_I)+\
-                C_ei*self._diff_fe(TF.inhibitory, E+c_0+lc_E, I+lc_I)+\
+                C_ei*self._diff_fe(TF.inhibitory, E, I+lc_I)+\
                 C_ei*self._diff_fi(TF.excitatory, E+c_0+lc_E, I+lc_I)+\
-                C_ii*self._diff_fi(TF.inhibitory, E+c_0+lc_E, I+lc_I)+\
+                C_ii*self._diff_fi(TF.inhibitory, E, I+lc_I)+\
                 -2.*C_ei)
 
         #Covariance inhibitory-inhibitory derivation
         derivative[4] = 1./self.T*(\
-                1./Ni*TF.inhibitory(E+c_0+lc_E, I+lc_I)*\
-                (1./self.T-TF.inhibitory(E+c_0+lc_E, I+lc_I))+\
-                (TF.inhibitory(E+c_0+lc_E, I+lc_I)-I)**2+\
-                2.*C_ii*self._diff_fi(TF.inhibitory, E+c_0+lc_E, I+lc_I)+\
+                1./Ni*TF.inhibitory(E, I+lc_I)*\
+                (1./self.T-TF.inhibitory(E, I+lc_I))+\
+                (TF.inhibitory(E, I+lc_I)-I)**2+\
+                2.*C_ii*self._diff_fi(TF.inhibitory, E, I+lc_I)+\
                 2.*C_ei*self._diff_fe(TF.excitatory, E+c_0+lc_E, I+lc_I)+\
                 -2.*C_ii)
 
@@ -407,26 +407,20 @@ class Zerlaut_model_second_order(Model):
     ##### Derivatives taken numerically : use a central difference formula with spacing `dx`
     ## to be implemented analitically ! not hard...
 
-    def _diff_fe(self,TF, fe, fi):
-        df = 10**(numpy.log10(fe)-4)
-        return (TF(fe+df, fi)-TF(fe-df,fi))/(2*df)
+    def _diff_fe(self,TF, fe, fi,df=1e-7):
+        return (TF(fe+df, fi)-TF(fe-df,fi))/(2*df*1e3)
 
-    def _diff_fi(self,TF, fe, fi):
-        df = 10**(numpy.log10(fi)-4)
-        return (TF(fe, fi+df)-TF(fe, fi-df))/(2*df)
+    def _diff_fi(self,TF, fe, fi,df=1e-7):
+        return (TF(fe, fi+df)-TF(fe, fi-df))/(2*df*1e3)
 
-    def _diff2_fe_fe(self,TF, fe, fi):
-        df = 10**(numpy.log10(fe)-4)
-        return (TF(fe+df, fi)-2*TF(fe,fi)+TF(fe-df, fi))/(df**2)
+    def _diff2_fe_fe(self,TF, fe, fi,df=1e-7):
+        return (TF(fe+df, fi)-2*TF(fe,fi)+TF(fe-df, fi))/((df*1e3)**2)
 
-    def _diff2_fi_fe(self,TF, fe, fi):
-        df = 10**(numpy.log10(fe)-4)
-        return (self._diff_fi(TF, fe+df, fi)-self._diff_fi(TF,fe-df,fi))/(2*df)
+    def _diff2_fi_fe(self,TF, fe, fi,df=1e-7):
+        return (self._diff_fi(TF, fe+df, fi)-self._diff_fi(TF,fe-df,fi))/(2*df*1e3)
 
-    def _diff2_fe_fi(self,TF, fe, fi):
-        df = 10**(numpy.log10(fi)-4)
-        return (self._diff_fe(TF, fe, fi+df)-self._diff_fe(TF,fe, fi-df))/(2*df)
+    def _diff2_fe_fi(self,TF, fe, fi,df=1e-7):
+        return (self._diff_fe(TF, fe, fi+df)-self._diff_fe(TF,fe, fi-df))/(2*df*1e3)
 
-    def _diff2_fi_fi(self,TF, fe, fi):
-        df = 10**(numpy.log10(fi)-4)
-        return (TF(fe, fi+df)-2*TF(fe, fi)+TF(fe, fi-df))/(df**2)
+    def _diff2_fi_fi(self,TF, fe, fi,df=1e-7):
+        return (TF(fe, fi+df)-2*TF(fe, fi)+TF(fe, fi-df))/((df*1e3)**2)
