@@ -34,9 +34,9 @@ class Transfer_Function:
         # here TOTAL (sum over synapses) excitatory and inhibitory input
 
         #firing rate
-        fe = (Fe+ 1e-7)*(1.-gei)*pconnec*Ntot  # default is 1 # add 1e-7 in order to avoid numerical error in the calculation of derivation of transfert function == noise
-        fi = (Fi+ 1e-7)*gei*pconnec*Ntot        # add 1e-7 in order to avoid numerical error in the calculation of derivation of transfert function == noise
-
+        fe = (Fe+1e-6)*(1.-gei)*pconnec*Ntot  # default is 1 # add 1e-6 in order to avoid numerical error in the calculation of derivation of transfert function == noise
+        fi = (Fi+1e-6)*gei*pconnec*Ntot
+            #explaination of 1e-7 : spontaneous release of synaptic neurotransmitter or some intrinsic currents
         # conductance fluctuation
         # Eqns 5 from [ZD_2017]
         muGe, muGi = Qe*Te*fe, Qi*Ti*fi
@@ -67,7 +67,7 @@ class Transfer_Function:
         Tv_denominator = ( fe*(Ue*Te)**2/(Te+Tm) + fi*(Ui*Ti)**2/(Ti+Tm) )
         TvN = np.divide(Tv_numerator,Tv_denominator,out=np.ones_like(Tv_numerator),where=Tv_denominator!=0.0)
 
-        return muV, sV + 1e-9, muGn, TvN #add 1e9  to sV to avoid to divid by zero and represent external noise
+        return muV, sV, muGn, TvN #add 1e9  to sV to avoid to divid by zero and represent external noise
 
     def erfc_func(self,muV, sV, TvN, Vthre):
         # Eqns 3 from [ZD_2017]

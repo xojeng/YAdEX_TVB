@@ -248,7 +248,7 @@ class Zerlaut_model_second_order(Model):
 
     nu_ext = arrays.FloatArray(
         label=":math:`\nu_e^{drive}`",
-        default=numpy.array([4.0]),
+        default=numpy.array([0.0]),
         range=basic.Range(lo=0.0, hi=100.0, step=0.01),
         doc="""external drive""",
         order=22)
@@ -282,8 +282,8 @@ class Zerlaut_model_second_order(Model):
 
     external_input = arrays.FloatArray(
         label=":math:`\nu_e^{drive}`",
-        default=numpy.array([0.0]),
-        range=basic.Range(lo=1e-8, hi=0.1, step=0.001),
+        default=numpy.array([0.000]),
+        range=basic.Range(lo=0.001, hi=0.1, step=0.001),
         doc="""external drive""",
         order=23)
 
