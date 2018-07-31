@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pylab as plt
 import numpy.random as rgn
 from Zerlaut_model_second_order import Zerlaut_model_second_order
-
+# from Zerlaut import Zerlaut_second_order as Zerlaut_model_second_order
 rgn.seed(10)
 model = Zerlaut_model_second_order(variables_of_interest='E I C_ee C_ei C_ii'.split())
 white_matter = lab.connectivity.Connectivity(load_default=True)

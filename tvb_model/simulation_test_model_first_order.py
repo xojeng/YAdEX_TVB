@@ -2,7 +2,8 @@ import tvb.simulator.lab as lab
 import numpy as np
 import matplotlib.pylab as plt
 import numpy.random as rgn
-from Zerlaut_model_first_order import Zerlaut_model_first_order
+# from Zerlaut_model_first_order import Zerlaut_model_first_order
+from Zerlaut import Zerlaut_first_order as Zerlaut_model_first_order
 
 rgn.seed(10)
 model = Zerlaut_model_first_order()

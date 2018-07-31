@@ -283,6 +283,12 @@ class Zerlaut_model_first_order(Model):
         doc="""Polynome of inhibitory phenomenological threshold (order 10)""",
         order=24)
 
+    external_input = arrays.FloatArray(
+        label=":math:`\nu_e^{drive}`",
+        default=numpy.array([0.004]),
+        range=basic.Range(lo=0.001, hi=0.1, step=0.001),
+        doc="""external drive""",
+        order=23)
 
     # Used for phase-plane axis ranges and to bound random initial() conditions.
     state_variable_range = basic.Dict(
@@ -339,8 +345,8 @@ class Zerlaut_model_first_order(Model):
         # https://bitbucket.org/yzerlaut/mean_field_for_multi_input_integration
         # ./mean_field/master_equation.py
         # Excitatory firing rate derivation
-        derivative[0] = (TF.excitatory(E+c_0+lc_E, I+lc_I)-E)/self.T #TODO : need to check the accuracy of the equation
+        derivative[0] = (TF.excitatory(E+c_0+lc_E+ self.external_input, I+lc_I+ self.external_input)-E)/self.T #TODO : need to check the accuracy of the equation
         # Inhibitory firing rate derivation
-        derivative[1] = (TF.inhibitory(E, I+lc_I)-I)/self.T #TODO : need to check the accuracy of the equation
+        derivative[1] = (TF.inhibitory(E+ self.external_input, I+lc_I+ self.external_input)-I)/self.T #TODO : need to check the accuracy of the equation
 
         return derivative

@@ -282,7 +282,7 @@ class Zerlaut_model_second_order(Model):
 
     external_input = arrays.FloatArray(
         label=":math:`\nu_e^{drive}`",
-        default=numpy.array([0.000]),
+        default=numpy.array([0.004]),
         range=basic.Range(lo=0.001, hi=0.1, step=0.001),
         doc="""external drive""",
         order=23)
@@ -291,8 +291,8 @@ class Zerlaut_model_second_order(Model):
     # Used for phase-plane axis ranges and to bound random initial() conditions.
     state_variable_range = basic.Dict(
         label="State Variable ranges [lo, hi]",
-        default={"E": numpy.array([0.0001, 0.1]), # actually the 200Hz should be replaced by 1/T_refrac, but let's take that
-                 "I": numpy.array([0.0001, 0.1]),
+        default={"E": numpy.array([0.0, 0.2]), # actually the 200Hz should be replaced by 1/T_refrac, but let's take that
+                 "I": numpy.array([0.0, 0.2]),
                  "C_ee":numpy.array([0.0, 0.0]), # variance is positive or null
                  "C_ei":numpy.array([0.0, 0.0]), # the co-variance is in [-c_ee*c_ii,c_ee*c_ii]
                  "C_ii":numpy.array([0.0, 0.0]) # variance is positive or null
@@ -348,7 +348,7 @@ class Zerlaut_model_second_order(Model):
         c_0 = coupling[0, :]
 
         # short-range (local) coupling
-        lc_E = local_coupling * E +self.external_input
+        lc_E = local_coupling * E
         lc_I = local_coupling * I
 
         #equation is inspired from github of Zerlaut :
@@ -358,45 +358,45 @@ class Zerlaut_model_second_order(Model):
         # Excitatory firing rate derivation
         # #TODO : need to check the accuracy of all equations
         derivative[0] = 1./self.T*(\
-                .5*C_ee*self._diff2_fe_fe(TF.excitatory, E+c_0+lc_E, I+lc_I)+\
-                .5*C_ei*self._diff2_fe_fi(TF.excitatory, E+c_0+lc_E, I+lc_I)+\
-                .5*C_ei*self._diff2_fi_fe(TF.excitatory, E+c_0+lc_E, I+lc_I)+\
-                .5*C_ii*self._diff2_fi_fi(TF.excitatory, E+c_0+lc_E, I+lc_I)+\
-                TF.excitatory(E+c_0+lc_E, I+lc_I)-E)
+                .5*C_ee*self._diff2_fe_fe(TF.excitatory, E+c_0+lc_E+ self.external_input, I+lc_I+ self.external_input)+\
+                .5*C_ei*self._diff2_fe_fi(TF.excitatory, E+c_0+lc_E+ self.external_input, I+lc_I+ self.external_input)+\
+                .5*C_ei*self._diff2_fi_fe(TF.excitatory, E+c_0+lc_E+ self.external_input, I+lc_I+ self.external_input)+\
+                .5*C_ii*self._diff2_fi_fi(TF.excitatory, E+c_0+lc_E+ self.external_input, I+lc_I+ self.external_input)+\
+                TF.excitatory(E+c_0+lc_E+ self.external_input, I+lc_I+ self.external_input)-E)
         #Inhibitory firing rate derivation
         derivative[1] = 1./self.T*(\
-                .5*C_ee*self._diff2_fe_fe(TF.inhibitory, E, I+lc_I)+\
-                .5*C_ei*self._diff2_fe_fi(TF.inhibitory, E, I+lc_I)+\
-                .5*C_ei*self._diff2_fi_fe(TF.inhibitory, E, I+lc_I)+\
-                .5*C_ii*self._diff2_fi_fi(TF.inhibitory, E, I+lc_I)+\
-                TF.inhibitory(E, I+lc_I)-I)
+                .5*C_ee*self._diff2_fe_fe(TF.inhibitory, E+lc_E+ self.external_input, I+lc_I+ self.external_input)+\
+                .5*C_ei*self._diff2_fe_fi(TF.inhibitory, E+lc_E+ self.external_input, I+lc_I+ self.external_input)+\
+                .5*C_ei*self._diff2_fi_fe(TF.inhibitory, E+lc_E+ self.external_input, I+lc_I+ self.external_input)+\
+                .5*C_ii*self._diff2_fi_fi(TF.inhibitory, E+lc_E+ self.external_input, I+lc_I+ self.external_input)+\
+                TF.inhibitory(E+lc_E+ self.external_input, I+lc_I+ self.external_input)-I)
         #Covariance excitatory-excitatory derivation
         derivative[2] = 1./self.T*(\
-                1./Ne*TF.excitatory(E+c_0+lc_E, I+lc_I)*\
-                (1./self.T-TF.excitatory(E+c_0+lc_E, I+lc_I))+\
-                (TF.excitatory(E+c_0+lc_E, I+lc_I)-E)**2+\
-                2.*C_ee*self._diff_fe(TF.excitatory, E+c_0+lc_E, I+lc_I)+\
-                2.*C_ei*self._diff_fi(TF.inhibitory, E, I+lc_I)+\
+                1./Ne*TF.excitatory(E+c_0+lc_E+ self.external_input, I+lc_I+ self.external_input)*\
+                (1./self.T-TF.excitatory(E+c_0+lc_E+ self.external_input, I+lc_I+ self.external_input))+\
+                (TF.excitatory(E+c_0+lc_E+ self.external_input, I+lc_I+ self.external_input)-E)**2+\
+                2.*C_ee*self._diff_fe(TF.excitatory, E+c_0+lc_E+ self.external_input, I+lc_I+ self.external_input)+\
+                2.*C_ei*self._diff_fi(TF.inhibitory, E+lc_E+ self.external_input, I+lc_I+ self.external_input)+\
                 -2.*C_ee)
 
 
         #Covariance excitatory-inhibitory or inhibitory-excitatory derivation
         derivative[3] = 1./self.T*\
-                ((TF.excitatory(E+c_0+lc_E, I+lc_I)-E)*\
-                (TF.inhibitory(E+c_0+lc_E, I+lc_I)-I)+\
-                C_ee*self._diff_fe(TF.excitatory, E+c_0+lc_E, I+lc_I)+\
-                C_ei*self._diff_fe(TF.inhibitory, E, I+lc_I)+\
-                C_ei*self._diff_fi(TF.excitatory, E+c_0+lc_E, I+lc_I)+\
-                C_ii*self._diff_fi(TF.inhibitory, E, I+lc_I)+\
+                ((TF.excitatory(E+c_0+lc_E+ self.external_input, I+lc_I+ self.external_input)-E)*\
+                (TF.inhibitory(E+lc_E+ self.external_input, I+lc_I+ self.external_input)-I)+\
+                C_ee*self._diff_fe(TF.excitatory, E+c_0+lc_E+ self.external_input, I+lc_I+ self.external_input)+\
+                C_ei*self._diff_fe(TF.inhibitory, E+lc_E+ self.external_input, I+lc_I+ self.external_input)+\
+                C_ei*self._diff_fi(TF.excitatory, E+c_0+lc_E+ self.external_input, I+lc_I+ self.external_input)+\
+                C_ii*self._diff_fi(TF.inhibitory, E+lc_E+ self.external_input, I+lc_I+ self.external_input)+\
                 -2.*C_ei)
 
         #Covariance inhibitory-inhibitory derivation
         derivative[4] = 1./self.T*(\
-                1./Ni*TF.inhibitory(E, I+lc_I)*\
-                (1./self.T-TF.inhibitory(E, I+lc_I))+\
-                (TF.inhibitory(E, I+lc_I)-I)**2+\
-                2.*C_ii*self._diff_fi(TF.inhibitory, E, I+lc_I)+\
-                2.*C_ei*self._diff_fe(TF.excitatory, E+c_0+lc_E, I+lc_I)+\
+                1./Ni*TF.inhibitory(E+lc_E+ self.external_input, I+lc_I+ self.external_input)*\
+                (1./self.T-TF.inhibitory(E+lc_E+ self.external_input, I+lc_I+ self.external_input))+\
+                (TF.inhibitory(E+lc_E+ self.external_input, I+lc_I+ self.external_input)-I)**2+\
+                2.*C_ii*self._diff_fi(TF.inhibitory, E+lc_E+ self.external_input, I+lc_I+ self.external_input)+\
+                2.*C_ei*self._diff_fe(TF.excitatory, E+c_0+lc_E+ self.external_input, I+lc_I+ self.external_input)+\
                 -2.*C_ii)
 
         return derivative
