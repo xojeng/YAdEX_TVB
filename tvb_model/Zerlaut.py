@@ -109,14 +109,14 @@ class Zerlaut_adaptation_first_order(Model):
 
     E_L_e = arrays.FloatArray(
         label=":math:`E_{L}`",
-        default=numpy.array([-67.0]),
+        default=numpy.array([-63.0]),
         range=basic.Range(lo=-90.0, hi=-60.0, step=0.1),  # resting potential, usually between -85mV and -65mV
         doc="""leak reversal potential for excitatory [mV]""",
         order=2)
 
     E_L_i = arrays.FloatArray(
         label=":math:`E_{L}`",
-        default=numpy.array([-63.0]),
+        default=numpy.array([-65.0]),
         range=basic.Range(lo=-90.0, hi=-60.0, step=0.1),  # resting potential, usually between -85mV and -65mV
         doc="""leak reversal potential for inhibitory [mV]""",
         order=3)
@@ -230,12 +230,33 @@ class Zerlaut_adaptation_first_order(Model):
         order=18)
 
 
-    external_input = arrays.FloatArray(
+    external_input_ex_ex = arrays.FloatArray(
         label=":math:`\nu_e^{drive}`",
         default=numpy.array([0.0001]),
         range=basic.Range(lo=0.00, hi=0.1, step=0.001),
         doc="""external drive""",
         order=19)
+
+    external_input_ex_in = arrays.FloatArray(
+        label=":math:`\nu_e^{drive}`",
+        default=numpy.array([0.000]),
+        range=basic.Range(lo=0.00, hi=0.1, step=0.001),
+        doc="""external drive""",
+        order=20)
+
+    external_input_in_ex = arrays.FloatArray(
+        label=":math:`\nu_e^{drive}`",
+        default=numpy.array([0.000]),
+        range=basic.Range(lo=0.00, hi=0.1, step=0.001),
+        doc="""external drive""",
+        order=21)
+
+    external_input_in_in = arrays.FloatArray(
+        label=":math:`\nu_e^{drive}`",
+        default=numpy.array([0.000]),
+        range=basic.Range(lo=0.00, hi=0.1, step=0.001),
+        doc="""external drive""",
+        order=22)
 
     # Used for phase-plane axis ranges and to bound random initial() conditions.
     state_variable_range = basic.Dict(
@@ -252,7 +273,7 @@ class Zerlaut_adaptation_first_order(Model):
         I: firing rate of inhibitory population in KHz\N
         W: level of adaptation
         """,
-        order=20)
+        order=23)
 
     variables_of_interest = basic.Enumerate(
         label="Variables watched by Monitors",
@@ -263,7 +284,7 @@ class Zerlaut_adaptation_first_order(Model):
                monitored. It can be overridden for each Monitor if desired. The
                corresponding state-variable indices for this model are :math:`E = 0`,
                :math:`I = 1` and :math:`W = 2`.""",
-        order=21)
+        order=24)
 
     state_variables = 'E I W'.split()
     _nvar = 3
@@ -289,9 +310,9 @@ class Zerlaut_adaptation_first_order(Model):
         lc_I = local_coupling * I
 
         # Excitatory firing rate derivation
-        derivative[0] = (self.TF_excitatory(E+c_0+lc_E+self.external_input, I+lc_I+self.external_input,W)-E)/self.T
+        derivative[0] = (self.TF_excitatory(E+c_0+lc_E+self.external_input_ex_ex, I+lc_I+self.external_input_ex_in,W)-E)/self.T
         # Inhibitory firing rate derivation
-        derivative[1] = (self.TF_inhibitory(E+lc_E+self.external_input, I+lc_I+self.external_input,W)-I)/self.T
+        derivative[1] = (self.TF_inhibitory(E+lc_E+self.external_input_in_ex, I+lc_I+self.external_input_in_in,W)-I)/self.T
         # Adaptation
         derivative[2] = -W/self.tau_w+self.b*E
 
@@ -488,7 +509,7 @@ class Zerlaut_adaptation_second_order(Zerlaut_adaptation_first_order):
         C_ie: the variance of the inhibitory population activity \n
         W: level of adaptation
         """,
-        order=20)
+        order=23)
 
     variables_of_interest = basic.Enumerate(
         label="Variables watched by Monitors",
@@ -499,7 +520,7 @@ class Zerlaut_adaptation_second_order(Zerlaut_adaptation_first_order):
                monitored. It can be overridden for each Monitor if desired. The
                corresponding state-variable indices for this model are :math:`E = 0`,
                :math:`I = 1`, :math:`C_ee = 2`, :math:`C_ei = 3`, :math:`C_ii = 4` and :math:`W = 5`.""",
-        order=21)
+        order=24)
 
     state_variables = 'E I C_ee C_ei C_ii W'.split()
     _nvar = 6
@@ -552,10 +573,10 @@ class Zerlaut_adaptation_second_order(Zerlaut_adaptation_first_order):
         lc_E = local_coupling * E
         lc_I = local_coupling * I
 
-        E_input_excitatory = E+c_0+lc_E+self.external_input
-        E_input_inhibitory = E+lc_E+self.external_input
-        I_input_excitatory = I+lc_I+self.external_input
-        I_input_inhibitory = I+lc_I+self.external_input
+        E_input_excitatory = E+c_0+lc_E+self.external_input_ex_ex
+        E_input_inhibitory = E+lc_E+self.external_input_in_ex
+        I_input_excitatory = I+lc_I+self.external_input_ex_in
+        I_input_inhibitory = I+lc_I+self.external_input_in_in
 
         # Transfer function of excitatory and inhibitory neurons
         _TF_e = self.TF_excitatory(E_input_excitatory, I_input_excitatory, W)
