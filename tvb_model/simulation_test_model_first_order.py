@@ -1,3 +1,5 @@
+#import os; os.chdir('C:\Users\internet\Documents\doctora\\travail\YAdEX_TVB\\tvb_model')
+
 import tvb.simulator.lab as lab
 import numpy as np
 import matplotlib.pylab as plt
@@ -5,24 +7,26 @@ import numpy.random as rgn
 # from Zerlaut_model_first_order import Zerlaut_model_first_order
 from Zerlaut import Zerlaut_adaptation_first_order as Zerlaut_model_first_order
 
+
 rgn.seed(10)
 # Initialisation of the model
-model = Zerlaut_model_first_order(variables_of_interest='E I W'.split())
+model = Zerlaut_model_first_order(variables_of_interest='E I W_e W_i'.split())
 model.state_variable_range['E'] = np.array([0.007,0.00])
 model.state_variable_range['I'] = np.array([0.007,0.00])
-model.state_variable_range['W'] = np.array([40.0,0.0])
+model.state_variable_range['W_e'] = np.array([40.0,0.0])
+model.state_variable_range['W_i'] = np.array([0.0,0.0])
 # Configure the connectivity
 white_matter = lab.connectivity.Connectivity(load_default=True)
 white_matter.speed = np.array([4.0])
-white_matter_coupling = lab.coupling.Linear(a=0.0039)
+white_matter_coupling = lab.coupling.Linear(a=0.007)
 # Deterministic integrator
 heunint = lab.integrators.HeunDeterministic(dt=2**-6)
 # Stochastic integrator
 # hiss    = lab.noise.Multiplicative(nsig = np.array([0.0015]))
 # heunint = lab.integrators.HeunStochastic(dt=2**-6, noise=hiss)
 #Initialise some Monitors with period in physical time
-mon_raw = lab.monitors.Raw(variables_of_interest='E I W'.split())
-mon_tavg = lab.monitors.TemporalAverage(variables_of_interest=[0,1,2],period=2**-2)
+mon_raw = lab.monitors.Raw(variables_of_interest='E I W_e W_i'.split())
+mon_tavg = lab.monitors.TemporalAverage(variables_of_interest=[0,1,2,3],period=2**-2)
 
 #Bundle them
 what_to_watch = (mon_raw, mon_tavg)
@@ -57,13 +61,17 @@ TAVG = np.array(tavg_data)
 #Plot raw time series
 plt.figure(1)
 plt.plot(raw_time, RAW[:, 0, :, 0])
-plt.title("Raw -- State variable 0")
+plt.title("Raw -- State variable E")
 plt.figure(2)
 plt.plot(raw_time, RAW[:, 1, :, 0])
-plt.title("Raw -- State variable 1")
+plt.title("Raw -- State variable I")
 plt.figure(3)
 plt.plot(raw_time, RAW[:, 2, :, 0])
-plt.title("Raw -- State variable 2")
+plt.title("Raw -- State variable W_e")
+plt.figure(4)
+plt.plot(raw_time, RAW[:, 3, :, 0])
+plt.title("Raw -- State variable W_i")
+
 
 #Plot temporally averaged time series
 plt.figure(4)

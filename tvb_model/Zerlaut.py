@@ -109,7 +109,7 @@ class Zerlaut_adaptation_first_order(Model):
 
     E_L_e = arrays.FloatArray(
         label=":math:`E_{L}`",
-        default=numpy.array([-63.0]),
+        default=numpy.array([-65.0]),
         range=basic.Range(lo=-90.0, hi=-60.0, step=0.1),  # resting potential, usually between -85mV and -65mV
         doc="""leak reversal potential for excitatory [mV]""",
         order=2)
@@ -124,110 +124,141 @@ class Zerlaut_adaptation_first_order(Model):
     # N.B. Not independent of g_L, C_m should scale linearly with g_L
     C_m = arrays.FloatArray(
         label=":math:`C_{m}`",
-        default=numpy.array([150]),
+        default=numpy.array([200.0]),
         range=basic.Range(lo=10.0, hi=500.0, step=10.0),  # 20pF very small cell, 400pF very
         doc="""membrane capacitance [pF]""",
         order=4)
 
-    b = arrays.FloatArray(
-        label=":math:`b`",
-        default=numpy.array([60.0]),
+    b_e = arrays.FloatArray(
+        label=":math:`Excitatory b`",
+        default=numpy.array([100.0]),
         range=basic.Range(lo=0.0, hi=150.0, step=1.0),
-        doc="""Adaptation [nS]""",
+        doc="""Excitatory adaptation current increment [pA]""",
         order=5)
 
-    tau_w = arrays.FloatArray(
-        label=":math:`tau_w`",
-        default=numpy.array([500.0]),
-        range=basic.Range(lo=5.0, hi=1000.0, step=1.0),
-        doc="""Adaptation time constant [ms]""",
+    a_e = arrays.FloatArray(
+        label=":math:`Excitatory a`",
+        default=numpy.array([4.0]),
+        range=basic.Range(lo=0.0, hi=20.0, step=0.1),
+        doc="""Excitatory adaptation conductance [nS]""",
         order=6)
+
+    b_i = arrays.FloatArray(
+        label=":math:`Inhibitory b`",
+        default=numpy.array([0.0]),
+        range=basic.Range(lo=0.0, hi=100.0, step=0.1),
+        doc="""Inhibitory adaptation current increment [pA]""",
+        order=7)
+
+    a_i = arrays.FloatArray(
+        label=":math:`Inhibitory a`",
+        default=numpy.array([0.0]),
+        range=basic.Range(lo=0.0, hi=20.0, step=0.1),
+        doc="""Inhibitory adaptation conductance [nS]""",
+        order=8)
+
+    tau_w_e = arrays.FloatArray(
+        label=":math:`tau_w_e`",
+        default=numpy.array([500.0]),
+        range=basic.Range(lo=1.0, hi=1000.0, step=1.0),
+        doc="""Adaptation time constant of excitatory neurons [ms]""",
+        order=9)
+
+    tau_w_i = arrays.FloatArray(
+        label=":math:`tau_w_e`",
+        default=numpy.array([1.0]),
+        range=basic.Range(lo=1.0, hi=1000.0, step=1.0),
+        doc="""Adaptation time constant of excitatory neurons [ms]""",
+        order=10)
 
     E_e = arrays.FloatArray(
         label=r":math:`E_e`",
         default=numpy.array([0.0]),
         range=basic.Range(lo=-20., hi=20., step=0.01),
         doc="""excitatory reversal potential [mV]""",
-        order=7)
+        order=11)
 
     E_i = arrays.FloatArray(
         label=":math:`E_i`",
         default=numpy.array([-80.0]),
         range=basic.Range(lo=-100.0, hi=-60.0, step=1.0),
         doc="""inhibitory reversal potential [mV]""",
-        order=8)
+        order=12)
 
     Q_e = arrays.FloatArray(
         label=r":math:`Q_e`",
-        default=numpy.array([1.0]),
+        default=numpy.array([1.5]),
         range=basic.Range(lo=0.0, hi=5.0, step=0.1),
         doc="""excitatory quantal conductance [nS]""",
-        order=9)
+        order=13)
 
     Q_i = arrays.FloatArray(
         label=r":math:`Q_i`",
         default=numpy.array([5.0]),
         range=basic.Range(lo=0.0, hi=10.0, step=0.1),
         doc="""inhibitory quantal conductance [nS]""",
-        order=10)
+        order=14)
 
     tau_e = arrays.FloatArray(
         label=":math:`\tau_e`",
         default=numpy.array([5.0]),
         range=basic.Range(lo=1.0, hi=10.0, step=1.0),
         doc="""excitatory decay [ms]""",
-        order=11)
+        order=15)
 
     tau_i = arrays.FloatArray(
         label=":math:`\tau_i`",
         default=numpy.array([5.0]),
         range=basic.Range(lo=0.5, hi=10.0, step=0.01),
         doc="""inhibitory decay [ms]""",
-        order=12)
+        order=16)
 
     N_tot = arrays.IntegerArray(
         label=":math:`N_{tot}`",
         default=numpy.array([10000]),
         range=basic.Range(lo=1000, hi=50000, step=1000),
         doc="""cell number""",
-        order=13)
+        order=17)
 
     p_connect = arrays.FloatArray(
         label=":math:`\epsilon`",
         default=numpy.array([0.05]),
         range=basic.Range(lo=0.001, hi=0.2, step=0.001),  # valid only for relatively sparse connectivities
         doc="""connectivity probability""",
-        order=14)
+        order=18)
 
     g = arrays.FloatArray(
         label=":math:`g`",
         default=numpy.array([0.2]),
         range=basic.Range(lo=0.01, hi=0.4, step=0.01),  # inhibitory cell number never overcomes excitatory ones
         doc="""fraction of inhibitory cells""",
-        order=15)
+        order=19)
 
     T = arrays.FloatArray(
         label=":math:`T`",
         default=numpy.array([5.0]),
         range=basic.Range(lo=1., hi=20.0, step=0.1),
         doc="""time scale of describing network activity""",
-        order=16)
+        order=20)
 
     P_e = arrays.IndexArray(
         label=":math:`P_e`",  # TODO need to check the size of the array when it's used
-        default=numpy.array([-4.98e-02,  5.06e-03,  -2.5e-02,  1.4e-03,
-                              -4.1e-04,  1.05e-02,  -3.6e-02,  7.4e-03,
-                              1.2e-03,  -4.07e-02]),
+        default=numpy.array([-0.04983106,  0.005063550882777035,  -0.023470121807314552,
+                             0.0022951513725067503,
+                              -0.0004105302652029825,  0.010547051343547399,  -0.03659252821136933,
+                              0.007437487505797858,  0.001265064721846073, -0.04072161294490446]),
         doc="""Polynome of excitatory phenomenological threshold (order 9)""",
-        order=17)
+        order=21)
 
     P_i = arrays.IndexArray(
         label=":math:`P_i`",  # TODO need to check the size of the array when it's used
-        default=numpy.array([-5.14e-02,  4.0e-03, -8.3e-03,  2.0e-04,
-                              -5.0e-04,  1.4e-03, -1.46e-02, 4.5e-03,
-                              2.8e-03, -1.53e-02]),
+        default=numpy.array([-0.05149122024209484,  0.004003689190271077, -0.008352013668528155,
+                             0.0002414237992765705,
+                              -0.0005070645080016026,  0.0014345394104282397, -0.014686689498949967,
+                            0.004502706285435741,
+                              0.0028472190352532454, -0.015357804594594548]),
         doc="""Polynome of inhibitory phenomenological threshold (order 9)""",
-        order=18)
+        order=22)
 
 
     external_input_ex_ex = arrays.FloatArray(
@@ -235,60 +266,63 @@ class Zerlaut_adaptation_first_order(Model):
         default=numpy.array([0.0001]),
         range=basic.Range(lo=0.00, hi=0.1, step=0.001),
         doc="""external drive""",
-        order=19)
+        order=23)
 
     external_input_ex_in = arrays.FloatArray(
         label=":math:`\nu_e^{drive}`",
         default=numpy.array([0.000]),
         range=basic.Range(lo=0.00, hi=0.1, step=0.001),
         doc="""external drive""",
-        order=20)
+        order=24)
 
     external_input_in_ex = arrays.FloatArray(
         label=":math:`\nu_e^{drive}`",
         default=numpy.array([0.000]),
         range=basic.Range(lo=0.00, hi=0.1, step=0.001),
         doc="""external drive""",
-        order=21)
+        order=25)
 
     external_input_in_in = arrays.FloatArray(
         label=":math:`\nu_e^{drive}`",
         default=numpy.array([0.000]),
         range=basic.Range(lo=0.00, hi=0.1, step=0.001),
         doc="""external drive""",
-        order=22)
+        order=26)
 
     # Used for phase-plane axis ranges and to bound random initial() conditions.
     state_variable_range = basic.Dict(
         label="State Variable ranges [lo, hi]",
         default={"E": numpy.array([0.0, 0.1]),  # actually the 100Hz should be replaced by 1/T_refrac
                  "I": numpy.array([0.0, 0.1]),
-                 "W": numpy.array([0.0,100.0])},
+                 "W_e": numpy.array([0.0,100.0]),
+                 "W_i": numpy.array([0.0,100.0]),
+                     },
         doc="""The values for each state-variable should be set to encompass
         the expected dynamic range of that state-variable for the current
         parameters, it is used as a mechanism for bounding random initial
         conditions when the simulation isn't started from an explicit history,
         it is also provides the default range of phase-plane plots.\n
         E: firing rate of excitatory population in KHz\n
-        I: firing rate of inhibitory population in KHz\N
-        W: level of adaptation
+        I: firing rate of inhibitory population in KHz\n
+        W_e: level of adaptation of excitatory in pA\n
+        W_i: level of adaptation of inhibitory in pA\n
         """,
-        order=23)
+        order=27)
 
     variables_of_interest = basic.Enumerate(
         label="Variables watched by Monitors",
-        options=["E", "I","W"],
+        options=["E", "I","W_e","W_i"],
         default=["E"],
         select_multiple=True,
         doc="""This represents the default state-variables of this Model to be
                monitored. It can be overridden for each Monitor if desired. The
                corresponding state-variable indices for this model are :math:`E = 0`,
                :math:`I = 1` and :math:`W = 2`.""",
-        order=24)
+        order=28)
 
-    state_variables = 'E I W'.split()
-    _nvar = 3
-    cvar = numpy.array([0, 1, 2], dtype=numpy.int32)
+    state_variables = 'E I W_e W_i'.split()
+    _nvar = 4
+    cvar = numpy.array([0, 1, 2, 3], dtype=numpy.int32)
 
     def dfun(self, state_variables, coupling, local_coupling=0.00):
         r"""
@@ -299,7 +333,8 @@ class Zerlaut_adaptation_first_order(Model):
         """
         E = state_variables[0, :]
         I = state_variables[1, :]
-        W = state_variables[2, :]
+        W_e = state_variables[2, :]
+        W_i = state_variables[3, :]
         derivative = numpy.empty_like(state_variables)
 
         # long-range coupling
@@ -310,11 +345,33 @@ class Zerlaut_adaptation_first_order(Model):
         lc_I = local_coupling * I
 
         # Excitatory firing rate derivation
-        derivative[0] = (self.TF_excitatory(E+c_0+lc_E+self.external_input_ex_ex, I+lc_I+self.external_input_ex_in,W)-E)/self.T
+        derivative[0] = (self.TF_excitatory(
+            E+c_0+lc_E+self.external_input_ex_ex,
+            I+lc_I+self.external_input_ex_in
+            ,W_e)-E)/self.T
         # Inhibitory firing rate derivation
-        derivative[1] = (self.TF_inhibitory(E+lc_E+self.external_input_in_ex, I+lc_I+self.external_input_in_in,W)-I)/self.T
-        # Adaptation
-        derivative[2] = -W/self.tau_w+self.b*E
+        derivative[1] = (self.TF_inhibitory(
+            E+lc_E+self.external_input_in_ex, 
+            I+lc_I+self.external_input_in_in,
+            W_i)-I)/self.T
+        # Adaptation excitatory
+        mu_V, sigma_V, T_V = self.get_fluct_regime_vars(
+                E+c_0+lc_E+self.external_input_ex_ex,
+                I+lc_I+self.external_input_ex_in,
+                W_e, self.Q_e, self.tau_e, self.E_e,
+                self.Q_i, self.tau_i, self.E_i,
+                self.g_L, self.C_m, self.E_L_e, self.N_tot,
+                self.p_connect, self.g)
+        derivative[2] = -W_e/self.tau_w_e+self.b_e*E+self.a_e*(mu_V-self.E_L_e)/self.tau_w_e
+        # Adaptation inhibitory
+        mu_V, sigma_V, T_V = self.get_fluct_regime_vars(
+                E+lc_E+self.external_input_in_ex,
+                I+lc_I+self.external_input_in_in,
+                W_i, self.Q_e, self.tau_e, self.E_e,
+                self.Q_i, self.tau_i, self.E_i,
+                self.g_L, self.C_m, self.E_L_i, self.N_tot,
+                self.p_connect, self.g)
+        derivative[3] = -W_i/self.tau_w_i+self.b_i*I+self.a_i*(mu_V-self.E_L_i)/self.tau_w_i
 
         return derivative
 
@@ -490,12 +547,13 @@ class Zerlaut_adaptation_second_order(Zerlaut_adaptation_first_order):
     #  Used for phase-plane axis ranges and to bound random initial() conditions.
     state_variable_range = basic.Dict(
         label="State Variable ranges [lo, hi]",
-        default={"E": numpy.array([0.0, 0.1]), # actually the 100Hz should be replaced by 1/T_refrac
-                 "I": numpy.array([0.0, 0.1]),
+        default={"E": numpy.array([0.0, 0.0]), # actually the 100Hz should be replaced by 1/T_refrac
+                 "I": numpy.array([0.0, 0.0]),
                  "C_ee": numpy.array([0.0, 0.0]),  # variance is positive or null
                  "C_ei": numpy.array([0.0, 0.0]),  # the co-variance is in [-c_ee*c_ii,c_ee*c_ii]
                  "C_ii": numpy.array([0.0, 0.0]),  # variance is positive or null
-                 "W":numpy.array([0.0, 100.0]),
+                 "W_e":numpy.array([0.0, 100.0]),
+                 "W_i":numpy.array([0.0, 100.0]),
                  },
         doc="""The values for each state-variable should be set to encompass
         the expected dynamic range of that state-variable for the current
@@ -509,22 +567,22 @@ class Zerlaut_adaptation_second_order(Zerlaut_adaptation_first_order):
         C_ie: the variance of the inhibitory population activity \n
         W: level of adaptation
         """,
-        order=23)
+        order=27)
 
     variables_of_interest = basic.Enumerate(
         label="Variables watched by Monitors",
-        options=["E", "I", "C_ee","C_ei","C_ii"],
+        options=["E", "I", "C_ee","C_ei","C_ii","W_e", "W_i"],
         default=["E"],
         select_multiple=True,
         doc="""This represents the default state-variables of this Model to be
                monitored. It can be overridden for each Monitor if desired. The
                corresponding state-variable indices for this model are :math:`E = 0`,
                :math:`I = 1`, :math:`C_ee = 2`, :math:`C_ei = 3`, :math:`C_ii = 4` and :math:`W = 5`.""",
-        order=24)
+        order=28)
 
-    state_variables = 'E I C_ee C_ei C_ii W'.split()
-    _nvar = 6
-    cvar = numpy.array([0, 1, 2, 3, 4, 5], dtype=numpy.int32)
+    state_variables = 'E I C_ee C_ei C_ii W_e W_i'.split()
+    _nvar = 7
+    cvar = numpy.array([0, 1, 2, 3, 4, 5, 6], dtype=numpy.int32)
 
     def dfun(self, state_variables, coupling, local_coupling=0.00):
         r"""
@@ -563,7 +621,8 @@ class Zerlaut_adaptation_second_order(Zerlaut_adaptation_first_order):
         C_ee = state_variables[2, :]
         C_ei = state_variables[3, :]
         C_ii = state_variables[4, :]
-        W = state_variables[5,:]
+        W_e = state_variables[5,:]
+        W_i = state_variables[6,:]
         derivative = numpy.empty_like(state_variables)
 
         # long-range coupling
@@ -579,8 +638,8 @@ class Zerlaut_adaptation_second_order(Zerlaut_adaptation_first_order):
         I_input_inhibitory = I+lc_I+self.external_input_in_in
 
         # Transfer function of excitatory and inhibitory neurons
-        _TF_e = self.TF_excitatory(E_input_excitatory, I_input_excitatory, W)
-        _TF_i = self.TF_inhibitory(E_input_inhibitory, I_input_inhibitory, W)
+        _TF_e = self.TF_excitatory(E_input_excitatory, I_input_excitatory, W_e)
+        _TF_i = self.TF_inhibitory(E_input_inhibitory, I_input_inhibitory, W_i)
 
         # Derivatives taken numerically : use a central difference formula with spacing `dx`
         def _diff_fe(TF, fe, fi, W, df=1e-7):
@@ -612,26 +671,26 @@ class Zerlaut_adaptation_second_order(Zerlaut_adaptation_first_order):
             return (TF(fe, fi+df, W)-2*_TF_i+TF(fe, fi-df, W))/((df*1e3)**2)
 
         #Precompute some result
-        _diff_fe_TF_e = _diff_fe(self.TF_excitatory, E_input_excitatory, I_input_excitatory, W)
-        _diff_fe_TF_i = _diff_fe(self.TF_inhibitory, E_input_inhibitory, I_input_inhibitory, W)
-        _diff_fi_TF_e = _diff_fi(self.TF_excitatory, E_input_excitatory, I_input_excitatory, W)
-        _diff_fi_TF_i = _diff_fi(self.TF_inhibitory, E_input_inhibitory, I_input_inhibitory, W)
+        _diff_fe_TF_e = _diff_fe(self.TF_excitatory, E_input_excitatory, I_input_excitatory, W_e)
+        _diff_fe_TF_i = _diff_fe(self.TF_inhibitory, E_input_inhibitory, I_input_inhibitory, W_i)
+        _diff_fi_TF_e = _diff_fi(self.TF_excitatory, E_input_excitatory, I_input_excitatory, W_e)
+        _diff_fi_TF_i = _diff_fi(self.TF_inhibitory, E_input_inhibitory, I_input_inhibitory, W_i)
 
         # equation is inspired from github of Zerlaut :
         # https://github.com/yzerlaut/notebook_papers/blob/master/modeling_mesoscopic_dynamics/mean_field/master_equation.py
         # Excitatory firing rate derivation
         derivative[0] = (_TF_e - E
-                         + .5*C_ee*_diff2_fe_fe_e(E_input_excitatory, I_input_excitatory, W)
-                         + .5*C_ei*_diff2_fe_fi(self.TF_excitatory, E_input_excitatory, I_input_excitatory, W)
-                         + .5*C_ei*_diff2_fi_fe(self.TF_excitatory, E_input_excitatory, I_input_excitatory, W)
-                         + .5*C_ii*_diff2_fi_fi_e(E_input_excitatory, I_input_excitatory, W)
+                         + .5*C_ee*_diff2_fe_fe_e(E_input_excitatory, I_input_excitatory, W_e)
+                         + .5*C_ei*_diff2_fe_fi(self.TF_excitatory, E_input_excitatory, I_input_excitatory, W_e)
+                         + .5*C_ei*_diff2_fi_fe(self.TF_excitatory, E_input_excitatory, I_input_excitatory, W_e)
+                         + .5*C_ii*_diff2_fi_fi_e(E_input_excitatory, I_input_excitatory, W_e)
                          )/self.T
         # Inhibitory firing rate derivation
         derivative[1] = (_TF_i - I
-                         + .5*C_ee*_diff2_fe_fe_i(E_input_inhibitory, I_input_inhibitory, W)
-                         + .5*C_ei*_diff2_fe_fi(self.TF_inhibitory, E_input_inhibitory, I_input_inhibitory, W)
-                         + .5*C_ei*_diff2_fi_fe(self.TF_inhibitory, E_input_inhibitory, I_input_inhibitory, W)
-                         + .5*C_ii*_diff2_fi_fi_i(E_input_inhibitory, I_input_inhibitory, W)
+                         + .5*C_ee*_diff2_fe_fe_i(E_input_inhibitory, I_input_inhibitory, W_i)
+                         + .5*C_ei*_diff2_fe_fi(self.TF_inhibitory, E_input_inhibitory, I_input_inhibitory, W_i)
+                         + .5*C_ei*_diff2_fi_fe(self.TF_inhibitory, E_input_inhibitory, I_input_inhibitory, W_i)
+                         + .5*C_ii*_diff2_fi_fi_i(E_input_inhibitory, I_input_inhibitory, W_i)
                          )/self.T
         # Covariance excitatory-excitatory derivation
         derivative[2] = (_TF_e*(1./self.T-_TF_e)/N_e
@@ -655,8 +714,26 @@ class Zerlaut_adaptation_second_order(Zerlaut_adaptation_first_order):
                          + 2.*C_ei*_diff_fe_TF_e
                          - 2.*C_ii
                          )/self.T
-        # Adaptation
-        derivative[5] = -W/self.tau_w+self.b*E
+
+        # Adaptation excitatory
+        mu_V, sigma_V, T_V = self.get_fluct_regime_vars(
+                E_input_excitatory,
+                E_input_inhibitory,
+                W_e, self.Q_e, self.tau_e, self.E_e,
+                self.Q_i, self.tau_i, self.E_i,
+                self.g_L, self.C_m, self.E_L_e, self.N_tot,
+                self.p_connect, self.g)
+        derivative[5] = -W_e/self.tau_w_e+self.b_e*E+self.a_e*(mu_V-self.E_L_e)/self.tau_w_e
+
+        # Adaptation inhibitory
+        mu_V, sigma_V, T_V = self.get_fluct_regime_vars(
+                I_input_excitatory,
+                I_input_inhibitory,
+                W_i, self.Q_e, self.tau_e, self.E_e,
+                self.Q_i, self.tau_i, self.E_i,
+                self.g_L, self.C_m, self.E_L_i, self.N_tot,
+                self.p_connect, self.g)
+        derivative[6] = -W_i/self.tau_w_i+self.b_i*I+self.a_i*(mu_V-self.E_L_i)/self.tau_w_i
 
         return derivative
 

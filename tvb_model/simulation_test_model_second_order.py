@@ -1,3 +1,4 @@
+#import os; os.chdir('C:\Users\internet\Documents\doctora\\travail\YAdEX_TVB\\tvb_model')
 import tvb.simulator.lab as lab
 import numpy as np
 import matplotlib.pylab as plt
@@ -7,10 +8,15 @@ from Zerlaut import Zerlaut_adaptation_second_order as Zerlaut_model_second_orde
 
 rgn.seed(10)
 # Initialisation of the model
-model = Zerlaut_model_second_order(variables_of_interest='E I C_ee C_ei C_ii W'.split())
+model = Zerlaut_model_second_order(variables_of_interest='E I C_ee C_ei C_ii W_e W_i'.split())
 model.state_variable_range['E'] = np.array([0.007,0.00])
 model.state_variable_range['I'] = np.array([0.007,0.00])
-model.state_variable_range['W'] = np.array([40.0,0.0])
+model.state_variable_range['W_e'] = np.array([40.0,0.0])
+model.state_variable_range['W_i'] = np.array([0.0,0.0])
+model.external_input_ex_ex = 0.0
+model.external_input_ex_in = 0.0
+model.external_input_in_ex = 0.0
+model.external_input_in_in = 0.0
 # Configure the connectivity
 white_matter = lab.connectivity.Connectivity(load_default=True)
 white_matter.speed = np.array([4.0])
@@ -21,8 +27,8 @@ heunint = lab.integrators.HeunDeterministic(dt=2**-6)
 # hiss    = lab.noise.Multiplicative(nsig = np.array([0.0015]))
 # heunint = lab.integrators.HeunStochastic(dt=2**-6, noise=hiss)
 #Initialise some Monitors with period in physical time
-mon_raw = lab.monitors.Raw(variables_of_interest='E I C_ee C_ei C_ii W'.split())
-mon_tavg = lab.monitors.TemporalAverage(variables_of_interest=[0,1,2,3,4,5],period=2**-2)
+mon_raw = lab.monitors.Raw(variables_of_interest='E I C_ee C_ei C_ii W_e W_i'.split())
+mon_tavg = lab.monitors.TemporalAverage(variables_of_interest=[0,1,2,3,4,5,6],period=2**-2)
 
 #Bundle them
 what_to_watch = (mon_raw, mon_tavg)
@@ -39,7 +45,7 @@ tavg_data = []
 tavg_time = []
 
 for raw, tavg in sim(simulation_length=2 ** 8):
-    print("time",raw[0],"raw : ",np.mean(raw[1][0]),np.mean(raw[1][1]),np.mean(raw[1][2]),np.mean(raw[1][3]),np.mean(raw[1][4]),np.mean(raw[1][5]))
+    print("time",raw[0],"raw : ",np.mean(raw[1][0]),np.mean(raw[1][1]),np.mean(raw[1][2]),np.mean(raw[1][3]),np.mean(raw[1][4]),np.mean(raw[1][5]),np.mean(raw[1][6]))
     if not raw is None:
         raw_time.append(raw[0])
         raw_data.append(raw[1])
@@ -70,7 +76,10 @@ plt.plot(raw_time, RAW[:, 4, :, 0])
 plt.title("Raw -- State variable C_II")
 plt.figure(6)
 plt.plot(raw_time, RAW[:, 5, :, 0])
-plt.title("Raw -- State variable W")
+plt.title("Raw -- State variable W_e")
+plt.figure(7)
+plt.plot(raw_time, RAW[:, 6, :, 0])
+plt.title("Raw -- State variable W_i")
 
 # #Plot temporally averaged time series
 # plt.figure(6)
