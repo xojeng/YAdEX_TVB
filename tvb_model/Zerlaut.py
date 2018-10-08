@@ -443,8 +443,8 @@ class Zerlaut_adaptation_first_order(Model):
         """
         # firing rate
         # 1e-6 represent spontaneous release of synaptic neurotransmitter or some intrinsic currents of neurons
-        fe = (Fe+1e-6)*(1.-g)*p_connect*N_tot
-        fi = (Fi+1e-6)*g*p_connect*N_tot
+        fe = (Fe)*(1.-g)*p_connect*N_tot
+        fi = (Fi)*g*p_connect*N_tot
 
         # conductance fluctuation and effective membrane time constant
         mu_Ge, mu_Gi = Q_e*tau_e*fe, Q_i*tau_i*fi  # Eqns 5 from [MV_2018]
@@ -458,12 +458,13 @@ class Zerlaut_adaptation_first_order(Model):
         # Standard deviation of the fluctuations
         # Eqns 8 from [MV_2018]
         sigma_V = numpy.sqrt(fe*(U_e*tau_e)**2/(2.*(tau_e+T_m))+fi*(U_i*tau_i)**2/(2.*(tau_i+T_m)))
+        fe, fi = fe+1e-12, fi+1e-12
         # Autocorrelation-time of the fluctuations Eqns 9 from [MV_2018]
         T_V_numerator = (fe*(U_e*tau_e)**2 + fi*(U_i*tau_i)**2)
         T_V_denominator = (fe*(U_e*tau_e)**2/(tau_e+T_m) + fi*(U_i*tau_i)**2/(tau_i+T_m))
         T_V = numpy.divide(T_V_numerator, T_V_denominator, out=numpy.ones_like(T_V_numerator),
                            where=T_V_denominator != 0.0)
-        return mu_V, sigma_V, T_V
+        return mu_V, sigma_V+1e-15, T_V
 
     @staticmethod
     def threshold_func(muV, sigmaV, TvN, P0, P1, P2, P3, P4, P5, P6, P7, P8, P9):
