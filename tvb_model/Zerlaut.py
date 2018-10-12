@@ -138,7 +138,7 @@ class Zerlaut_adaptation_first_order(Model):
 
     a_e = arrays.FloatArray(
         label=":math:`Excitatory a`",
-        default=numpy.array([4.0]),
+        default=numpy.array([0.0]),
         range=basic.Range(lo=0.0, hi=20.0, step=0.1),
         doc="""Excitatory adaptation conductance [nS]""",
         order=6)
@@ -263,7 +263,7 @@ class Zerlaut_adaptation_first_order(Model):
 
     external_input_ex_ex = arrays.FloatArray(
         label=":math:`\nu_e^{drive}`",
-        default=numpy.array([0.0001]),
+        default=numpy.array([0.000]),
         range=basic.Range(lo=0.00, hi=0.1, step=0.001),
         doc="""external drive""",
         order=23)
@@ -635,7 +635,7 @@ class Zerlaut_adaptation_second_order(Zerlaut_adaptation_first_order):
 
         E_input_excitatory = E+c_0+lc_E+self.external_input_ex_ex
         E_input_inhibitory = E+lc_E+self.external_input_in_ex
-        I_input_excitatory = I+lc_I+self.external_input_ex_in
+        I_input_excitatory = I+c_0+lc_I+self.external_input_ex_in
         I_input_inhibitory = I+lc_I+self.external_input_in_in
 
         # Transfer function of excitatory and inhibitory neurons
