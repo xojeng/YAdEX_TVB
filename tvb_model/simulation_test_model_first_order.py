@@ -1,5 +1,3 @@
-#import os; os.chdir('C:\Users\internet\Documents\doctora\\travail\YAdEX_TVB\\tvb_model')
-
 import tvb.simulator.lab as lab
 import numpy as np
 import matplotlib.pylab as plt
