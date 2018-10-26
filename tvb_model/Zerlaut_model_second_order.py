@@ -274,7 +274,7 @@ class Zerlaut_model_second_order(Model):
         label=":math:`P_i`", #TODO need to check the size of the array when it's used
         # required=False,
         # file_storage=core.FILE_STORAGE_NONE, #TODO need to verified if the value is correct or not
-        default= numpy.array([-5.46160664e-02,  4.58415750e-03, -1.77303201e-03,  6.64785219e-04,
+        default= numpy.array([-5.46160664e-02,  4.58415750e-03, -0.07743,  6.64785219e-04,
                               -3.00637490e-04,  3.93520293e-04, -5.14454957e-04, -6.39186948e-06,
                               -1.39021341e-03, -4.85663596e-04, -3.63617754e-04]),
         doc="""Polynome of inhibitory phenomenological threshold (order 10)""",
@@ -291,8 +291,8 @@ class Zerlaut_model_second_order(Model):
     # Used for phase-plane axis ranges and to bound random initial() conditions.
     state_variable_range = basic.Dict(
         label="State Variable ranges [lo, hi]",
-        default={"E": numpy.array([0.0, 0.2]), # actually the 200Hz should be replaced by 1/T_refrac, but let's take that
-                 "I": numpy.array([0.0, 0.2]),
+        default={"E": numpy.array([0.1, 0.0]), # actually the 200Hz should be replaced by 1/T_refrac, but let's take that
+                 "I": numpy.array([0.1, 0.0]),
                  "C_ee":numpy.array([0.0, 0.0]), # variance is positive or null
                  "C_ei":numpy.array([0.0, 0.0]), # the co-variance is in [-c_ee*c_ii,c_ee*c_ii]
                  "C_ii":numpy.array([0.0, 0.0]) # variance is positive or null
@@ -355,7 +355,7 @@ class Zerlaut_model_second_order(Model):
         # function from github of Zerlaut :
         # https://github.com/yzerlaut/notebook_papers/blob/master/modeling_mesoscopic_dynamics/mean_field/master_equation.py
 
-        # Excitatory firing rate derivation
+# Excitatory firing rate derivation
         # #TODO : need to check the accuracy of all equations
         derivative[0] = 1./self.T*(\
                 .5*C_ee*self._diff2_fe_fe(TF.excitatory, E+c_0+lc_E+ self.external_input, I+lc_I+ self.external_input)+\

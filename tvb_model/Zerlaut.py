@@ -5,7 +5,6 @@ Mean field model based on Master equation about adaptative exponential leacky in
 from tvb.simulator.models.base import Model, LOG, numpy, basic, arrays, core
 import scipy.special as sp_spec
 
-
 class Zerlaut_adaptation_first_order(Model):
     r"""
     **References**:
@@ -443,8 +442,8 @@ class Zerlaut_adaptation_first_order(Model):
         """
         # firing rate
         # 1e-6 represent spontaneous release of synaptic neurotransmitter or some intrinsic currents of neurons
-        fe = (Fe)*(1.-g)*p_connect*N_tot
-        fi = (Fi)*g*p_connect*N_tot
+        fe = (Fe+1.0e-6)*(1.-g)*p_connect*N_tot
+        fi = (Fi+1.0e-6)*g*p_connect*N_tot
 
         # conductance fluctuation and effective membrane time constant
         mu_Ge, mu_Gi = Q_e*tau_e*fe, Q_i*tau_i*fi  # Eqns 5 from [MV_2018]
@@ -458,13 +457,12 @@ class Zerlaut_adaptation_first_order(Model):
         # Standard deviation of the fluctuations
         # Eqns 8 from [MV_2018]
         sigma_V = numpy.sqrt(fe*(U_e*tau_e)**2/(2.*(tau_e+T_m))+fi*(U_i*tau_i)**2/(2.*(tau_i+T_m)))
-        fe, fi = fe+1e-12, fi+1e-12
         # Autocorrelation-time of the fluctuations Eqns 9 from [MV_2018]
         T_V_numerator = (fe*(U_e*tau_e)**2 + fi*(U_i*tau_i)**2)
         T_V_denominator = (fe*(U_e*tau_e)**2/(tau_e+T_m) + fi*(U_i*tau_i)**2/(tau_i+T_m))
         T_V = numpy.divide(T_V_numerator, T_V_denominator, out=numpy.ones_like(T_V_numerator),
                            where=T_V_denominator != 0.0)
-        return mu_V, sigma_V+1e-15, T_V
+        return mu_V, sigma_V, T_V
 
     @staticmethod
     def threshold_func(muV, sigmaV, TvN, P0, P1, P2, P3, P4, P5, P6, P7, P8, P9):
@@ -488,6 +486,13 @@ class Zerlaut_adaptation_first_order(Model):
 
     @staticmethod
     def estimate_firing_rate(muV, sigmaV, Tv, Vthre):
+        """
+        The threshold function of the neurons
+        :param muV: mean of membrane voltage
+        :param sigmaV: variance of membrane voltage
+        :param Tv: autocorrelation time constant
+        :param Vthre:threshold of neurons
+        """
         # Eqns 10 from [MV_2018]
         return sp_spec.erfc((Vthre-muV) / (numpy.sqrt(2)*sigmaV)) / (2*Tv)
 
@@ -614,9 +619,10 @@ class Zerlaut_adaptation_second_order(Zerlaut_adaptation_first_order):
             \right.
 
         """
+        #number of neurons
         N_e = self.N_tot * (1-self.g)
         N_i = self.N_tot * self.g
-
+        #state variable
         E = state_variables[0, :]
         I = state_variables[1, :]
         C_ee = state_variables[2, :]
@@ -633,9 +639,10 @@ class Zerlaut_adaptation_second_order(Zerlaut_adaptation_first_order):
         lc_E = local_coupling * E
         lc_I = local_coupling * I
 
+        #input of population
         E_input_excitatory = E+c_0+lc_E+self.external_input_ex_ex
         E_input_inhibitory = E+lc_E+self.external_input_in_ex
-        I_input_excitatory = I+c_0+lc_I+self.external_input_ex_in
+        I_input_excitatory = I+lc_I+self.external_input_ex_in
         I_input_inhibitory = I+lc_I+self.external_input_in_in
 
         # Transfer function of excitatory and inhibitory neurons
