@@ -19,7 +19,7 @@ class  Ornstein_Ulhenbeck_process (Additive):
         noise_add = numpy.sqrt(2.0 * self.nsig)
         check = self._noise*noise_add*1.5 + state_variables
         # drop value for negative noise
-        g_x = numpy.squeeze(numpy.swapaxes(numpy.repeat([noise_add],76,axis=0),0,1),3)
+        g_x = numpy.squeeze(numpy.swapaxes(numpy.repeat([noise_add],state_variables.shape[1],axis=0),0,1),3)
         g_x[:,numpy.where(check[0,:,:] <= 0.0)] = 0.0
         g_x[:,numpy.where(check[1,:,:] <= 0.0)] = 0.0
         return g_x
