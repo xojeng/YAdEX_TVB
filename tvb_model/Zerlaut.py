@@ -28,17 +28,19 @@ class Zerlaut_adaptation_first_order(Model):
     +--------------+------------+------------+
     | g_L          |   10.00    |   nS       |
     +--------------+------------+------------+
-    | E_L_e        |  -67.00    |   mV       |
+    | E_L_e        |  -60.00    |   mV       |
     +--------------+------------+------------+
-    | E_L_i        |  -63.00    |   mV       |
+    | E_L_i        |  -65.00    |   mV       |
     +--------------+------------+------------+
-    | C_m          |   150.0    |   pF       |
+    | C_m          |   200.0    |   pF       |
     +--------------+------------+------------+
     | b            |   60.0     |   nS       |
     +--------------+------------+------------+
+    | a            |   4.0      |   nS       |
+    +--------------+------------+------------+
     | tau_w        |   500.0    |   ms       |
     +--------------+------------+------------+
-    | T            |   5.0      |   ms       |
+    | T            |   20.0      |   ms       |
     +--------------+------------+------------+
     |          synaptic properties           |
     +--------------+------------+------------+
@@ -62,7 +64,7 @@ class Zerlaut_adaptation_first_order(Model):
     +--------------+------------+------------+
     | g            |   20.0 %   |            |
     +--------------+------------+------------+
-    |external_input|    0.001   | Hz         |
+    |external_input|    0.000   | Hz         |
     +--------------+------------+------------+
 
     The default coefficients of the transfert function are taken from table I of [MV_2018]_, pag.49
@@ -130,14 +132,14 @@ class Zerlaut_adaptation_first_order(Model):
 
     b_e = arrays.FloatArray(
         label=":math:`Excitatory b`",
-        default=numpy.array([100.0]),
+        default=numpy.array([60.0]),
         range=basic.Range(lo=0.0, hi=150.0, step=1.0),
         doc="""Excitatory adaptation current increment [pA]""",
         order=5)
 
     a_e = arrays.FloatArray(
         label=":math:`Excitatory a`",
-        default=numpy.array([0.0]),
+        default=numpy.array([4.0]),
         range=basic.Range(lo=0.0, hi=20.0, step=0.1),
         doc="""Excitatory adaptation conductance [nS]""",
         order=6)
@@ -167,7 +169,7 @@ class Zerlaut_adaptation_first_order(Model):
         label=":math:`tau_w_e`",
         default=numpy.array([1.0]),
         range=basic.Range(lo=1.0, hi=1000.0, step=1.0),
-        doc="""Adaptation time constant of excitatory neurons [ms]""",
+        doc="""Adaptation time constant of inhibitory neurons [ms]""",
         order=10)
 
     E_e = arrays.FloatArray(
@@ -235,7 +237,7 @@ class Zerlaut_adaptation_first_order(Model):
 
     T = arrays.FloatArray(
         label=":math:`T`",
-        default=numpy.array([5.0]),
+        default=numpy.array([20.0]),
         range=basic.Range(lo=1., hi=20.0, step=0.1),
         doc="""time scale of describing network activity""",
         order=20)
@@ -291,10 +293,10 @@ class Zerlaut_adaptation_first_order(Model):
     # Used for phase-plane axis ranges and to bound random initial() conditions.
     state_variable_range = basic.Dict(
         label="State Variable ranges [lo, hi]",
-        default={"E": numpy.array([0.0, 0.1]),  # actually the 100Hz should be replaced by 1/T_refrac
-                 "I": numpy.array([0.0, 0.1]),
-                 "W_e": numpy.array([0.0,100.0]),
-                 "W_i": numpy.array([0.0,100.0]),
+        default={"E": numpy.array([0.0, 0.0]),  # actually the 100Hz should be replaced by 1/T_refrac
+                 "I": numpy.array([0.0, 0.0]),
+                 "W_e": numpy.array([0.0,0.0]),
+                 "W_i": numpy.array([0.0,0.0]),
                      },
         doc="""The values for each state-variable should be set to encompass
         the expected dynamic range of that state-variable for the current
@@ -321,7 +323,7 @@ class Zerlaut_adaptation_first_order(Model):
 
     state_variables = 'E I W_e W_i'.split()
     _nvar = 4
-    cvar = numpy.array([0, 1, 2, 3], dtype=numpy.int32)
+    cvar = numpy.array([0], dtype=numpy.int32)
 
     def dfun(self, state_variables, coupling, local_coupling=0.00):
         r"""
@@ -350,7 +352,7 @@ class Zerlaut_adaptation_first_order(Model):
             ,W_e)-E)/self.T
         # Inhibitory firing rate derivation
         derivative[1] = (self.TF_inhibitory(
-            E+lc_E+self.external_input_in_ex, 
+            E+c_0+lc_E+self.external_input_in_ex,
             I+lc_I+self.external_input_in_in,
             W_i)-I)/self.T
         # Adaptation excitatory
@@ -364,7 +366,7 @@ class Zerlaut_adaptation_first_order(Model):
         derivative[2] = -W_e/self.tau_w_e+self.b_e*E+self.a_e*(mu_V-self.E_L_e)/self.tau_w_e
         # Adaptation inhibitory
         mu_V, sigma_V, T_V = self.get_fluct_regime_vars(
-                E+lc_E+self.external_input_in_ex,
+                E+c_0+lc_E+self.external_input_in_ex,
                 I+lc_I+self.external_input_in_in,
                 W_i, self.Q_e, self.tau_e, self.E_e,
                 self.Q_i, self.tau_i, self.E_i,
@@ -558,8 +560,8 @@ class Zerlaut_adaptation_second_order(Zerlaut_adaptation_first_order):
                  "C_ee": numpy.array([0.0, 0.0]),  # variance is positive or null
                  "C_ei": numpy.array([0.0, 0.0]),  # the co-variance is in [-c_ee*c_ii,c_ee*c_ii]
                  "C_ii": numpy.array([0.0, 0.0]),  # variance is positive or null
-                 "W_e":numpy.array([0.0, 100.0]),
-                 "W_i":numpy.array([0.0, 100.0]),
+                 "W_e":numpy.array([0.0, 0.0]),
+                 "W_i":numpy.array([0.0, 0.0]),
                  },
         doc="""The values for each state-variable should be set to encompass
         the expected dynamic range of that state-variable for the current
@@ -588,7 +590,6 @@ class Zerlaut_adaptation_second_order(Zerlaut_adaptation_first_order):
 
     state_variables = 'E I C_ee C_ei C_ii W_e W_i'.split()
     _nvar = 7
-    cvar = numpy.array([0, 1, 2, 3, 4, 5, 6], dtype=numpy.int32)
 
     def dfun(self, state_variables, coupling, local_coupling=0.00):
         r"""
@@ -641,7 +642,7 @@ class Zerlaut_adaptation_second_order(Zerlaut_adaptation_first_order):
 
         #input of population
         E_input_excitatory = E+c_0+lc_E+self.external_input_ex_ex
-        E_input_inhibitory = E+lc_E+self.external_input_in_ex
+        E_input_inhibitory = E+c_0+lc_E+self.external_input_in_ex
         I_input_excitatory = I+lc_I+self.external_input_ex_in
         I_input_inhibitory = I+lc_I+self.external_input_in_in
 
