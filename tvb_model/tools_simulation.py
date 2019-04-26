@@ -246,18 +246,19 @@ def get_result(path,time_begin,time_end):
     output =[]
 
     for count in range(count_begin,count_end):
-        result = np.load(path+'/step_'+str(count)+'.npy')
+        result = np.load(path+'/step_'+str(count)+'.npy',allow_pickle=True)
         for i in range(result.shape[0]):
             tmp = np.array(result[i])
-            tmp = tmp[np.where((time_begin <= tmp[:,0]) &  (tmp[:,0]<= time_end)),:]
-            tmp_time = tmp[0][:,0]
-            if tmp_time.shape[0] != 0:
-                one = tmp[0][:,1][0]
-                tmp_value = np.concatenate(tmp[0][:,1]).reshape(tmp_time.shape[0],one.shape[0],one.shape[1])
-                if len(output) == nb_monitor:
-                    output[i]=[np.concatenate([output[i][0],tmp_time]),np.concatenate([output[i][1],tmp_value])]
-                else:
-                    output.append([tmp_time,tmp_value])
+            if len(tmp) != 0:
+                tmp = tmp[np.where((time_begin <= tmp[:,0]) &  (tmp[:,0]<= time_end)),:]
+                tmp_time = tmp[0][:,0]
+                if tmp_time.shape[0] != 0:
+                    one = tmp[0][:,1][0]
+                    tmp_value = np.concatenate(tmp[0][:,1]).reshape(tmp_time.shape[0],one.shape[0],one.shape[1])
+                    if len(output) == nb_monitor:
+                        output[i]=[np.concatenate([output[i][0],tmp_time]),np.concatenate([output[i][1],tmp_value])]
+                    else:
+                        output.append([tmp_time,tmp_value])
     return output
 
 def get_region(path,time_begin,time_end,region_nb):
