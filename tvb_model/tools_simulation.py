@@ -311,6 +311,30 @@ def print_all(path,time_begin,time_end,position_monitor,position_variable):
              )
     plt.show()
 
+def print_EI_one(path,time_begin,time_end,position_monitor,position_node):
+    '''
+
+    :param path: the folder of the simulation
+    :param time_begin: the start time for the result
+    :param time_end: the ending time for the result
+    :param position_monitor: select the monitor
+    :param position_node:
+    :return: nothing
+    '''
+    output = get_result(path,time_begin,time_end)
+    import matplotlib.pyplot as plt
+    plt.plot(output[position_monitor][0]*1e-3, # time in second
+             output[position_monitor][1][:,0,position_node],
+             color='c')
+    plt.plot(output[position_monitor][0]*1e-3, # time in second
+             output[position_monitor][1][:,1,position_node],
+             color='r')
+    plt.figure()
+    plt.plot(output[position_monitor][0]*1e-3, # time in second
+             output[position_monitor][1][:,5,position_node],
+             color='g')
+    plt.show()
+
 def print_region(path,time_begin,time_end,position_monitor,position_variable,nb_region):
     '''
     print one value of on monitor for some times
