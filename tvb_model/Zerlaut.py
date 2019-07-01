@@ -65,6 +65,10 @@ class Zerlaut_adaptation_first_order(Model):
     +--------------+------------+------------+
     | g            |   20.0 %   |            |
     +--------------+------------+------------+
+    | K_e_ext      |   400      |            |
+    +--------------+------------+------------+
+    | K_i_ext      |   0        |            |
+    +--------------+------------+------------+
     |external_input|    0.000   | Hz         |
     +--------------+------------+------------+
 
@@ -360,6 +364,7 @@ class Zerlaut_adaptation_first_order(Model):
         lc_E = local_coupling * E
         lc_I = local_coupling * I
 
+        # external firing rate
         Fe_ext = c_0 + lc_E
         Fi_ext = lc_I
 
@@ -399,6 +404,8 @@ class Zerlaut_adaptation_first_order(Model):
         transfer function for excitatory population
         :param fe: firing rate of excitatory population
         :param fi: firing rate of inhibitory population
+        :param fe_ext: external excitatory input
+        :param fi_ext: external inhibitory input
         :param W: level of adaptation
         :return: result of transfer function
         """
@@ -409,6 +416,8 @@ class Zerlaut_adaptation_first_order(Model):
         transfer function for inhibitory population
         :param fe: firing rate of excitatory population
         :param fi: firing rate of inhibitory population
+        :param fe_ext: external excitatory input
+        :param fi_ext: external inhibitory input
         :param W: level of adaptation
         :return: result of transfer function
         """
@@ -421,6 +430,8 @@ class Zerlaut_adaptation_first_order(Model):
         https://github.com/yzerlaut/notebook_papers/tree/master/modeling_mesoscopic_dynamics
         :param fe: firing rate of excitatory population
         :param fi: firing rate of inhibitory population
+        :param fe_ext: external excitatory input
+        :param fi_ext: external inhibitory input
         :param W: level of adaptation
         :param P: Polynome of neurons phenomenological threshold (order 9)
         :param E_L: leak reversal potential
@@ -445,6 +456,8 @@ class Zerlaut_adaptation_first_order(Model):
         https://github.com/yzerlaut/notebook_papers/tree/master/modeling_mesoscopic_dynamics
         :param Fe: firing rate of excitatory population
         :param Fi: firing rate of inhibitory population
+        :param Fe_ext: external excitatory input
+        :param Fi_ext: external inhibitory input
         :param W: level of adaptation
         :param Q_e: excitatory quantal conductance
         :param tau_e: excitatory decay
@@ -661,7 +674,7 @@ class Zerlaut_adaptation_second_order(Zerlaut_adaptation_first_order):
         lc_E = local_coupling * E
         lc_I = local_coupling * I
 
-        #input of population
+        # external firing rate for the different population
         E_input_excitatory = c_0+lc_E+self.external_input_ex_ex
         E_input_inhibitory = c_0+lc_E+self.external_input_in_ex
         I_input_excitatory = lc_I+self.external_input_ex_in
