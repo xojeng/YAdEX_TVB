@@ -146,6 +146,7 @@ def init(parameter_simulation,parameter_model,parameter_connection_between_regio
                                                         )
         else:
             raise Exception('Bad type for the noise')
+        noise.random_stream.seed(parameter_simulation['seed'])
 
         if parameter_integrator['type'] == 'Heun':
             integrator = lab.integrators.HeunStochastic(noise=noise,dt=parameter_integrator['dt'])
