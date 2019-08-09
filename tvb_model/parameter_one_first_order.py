@@ -19,7 +19,7 @@ parameter_model ={
     'tau_w_e':500.0,
     'tau_w_i':1.0,
     'E_e':0.0,
-    'E_i':0.0,
+    'E_i':-80.0,
     'Q_e':1.5,
     'Q_i':5.0,
     'tau_e':5.0,
@@ -76,7 +76,7 @@ parameter_integrator={
     'stochastic':True,
     'noise_type': 'Ornstein_Ulhenbeck_process', # choice : Additive,Multiplicative,
     'noise_parameter':{
-        'nsig':[5.0e-6,5.0e-6,0.0,0.0],
+        'nsig':[1.0e-7,1.0e-7,0.0,0.0],
         'ntau':0.0,
         'dt':0.5
                         },
