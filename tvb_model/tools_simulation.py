@@ -10,7 +10,8 @@ import sys
 from scipy.optimize import fsolve
 
 def init(parameter_simulation,parameter_model,parameter_connection_between_region,parameter_coupling,
-         parameter_integrator,parameter_monitor, initial_condition=None):
+         parameter_integrator,parameter_monitor, initial_condition=None, parameter_stimulation = None,
+         my_seed = 10):
     '''
     Initialise the simulator with parameter
 
@@ -24,6 +25,7 @@ def init(parameter_simulation,parameter_model,parameter_connection_between_regio
     :return: the simulator initialize
     '''
     ## initialise the random generator
+    parameter_simulation['seed'] = my_seed
     rgn.seed(parameter_simulation['seed'])
 
     ## Model
@@ -84,6 +86,29 @@ def init(parameter_simulation,parameter_model,parameter_connection_between_regio
                                                tract_lengths=parameter_connection_between_region['tract_lengths'],
                                                weights=parameter_connection_between_region['weights'],)
     connection.speed = parameter_connection_between_region['speed']
+
+
+
+    ## Stimulus: added by TA and Jen
+    if parameter_stimulation is None:
+        stimulation = None
+    else:
+        eqn_t = lab.equations.PulseTrain()
+        eqn_t.parameters["onset"] = parameter_stimulation["onset"] # ms
+        eqn_t.parameters["tau"]   = parameter_stimulation["tau"] # ms
+        eqn_t.parameters["T"]     = parameter_stimulation["T"] # ms; # 0.02kHz repetition frequency
+        stimulation = lab.patterns.StimuliRegion(temporal=eqn_t,
+                                          connectivity=connection,
+                                          weight=parameter_stimulation['weights'])
+    ## end add
+
+
+
+
+
+
+
+
 
     ## Coupling
     if parameter_coupling['type'] == 'Linear':
@@ -170,6 +195,8 @@ def init(parameter_simulation,parameter_model,parameter_connection_between_regio
             period=parameter_monitor['parameter_Bold']['period'])
         monitors.append(monitor_Bold)
 
+
+
     #save the parameters in on file
     if not os.path.exists(parameter_simulation['path_result']):
         os.mkdir(parameter_simulation['path_result'])
@@ -185,19 +212,30 @@ def init(parameter_simulation,parameter_model,parameter_connection_between_regio
         f.write("\n")
     f.close()
     subprocess.call(['./correct_parameter.sh',parameter_simulation['path_result']+'/parameter.py']) ##Warning can be do'nt find the script
-    #initialize the simulator
+
+
+    #initialize the simulator: edited by TA and Jen, added stimulation argument, try removing surface
     if initial_condition == None:
         simulator = lab.simulator.Simulator(model = model, connectivity = connection,
-                          coupling = coupling, integrator = integrator, monitors = monitors)
+                          coupling = coupling, integrator = integrator, monitors = monitors,
+                                            stimulus=stimulation)
     else:
         simulator = lab.simulator.Simulator(model = model, connectivity = connection,
                                             coupling = coupling, integrator = integrator,
-                                            monitors = monitors, initial_conditions=initial_condition)
+                                            monitors = monitors, initial_conditions=initial_condition,
+                                            stimulus=stimulation)
     simulator.configure()
     if initial_condition == None:
         # save the initial condition
         np.save(parameter_simulation['path_result']+'/step_init.npy',simulator.history.buffer)
+        # end edit
     return simulator
+
+
+
+
+
+
 
 def run_simulation(simulator, time, parameter_simulation,parameter_monitor):
     '''
@@ -333,7 +371,7 @@ def print_EI_one(path,time_begin,time_end,position_monitor,position_node):
     plt.figure()
     plt.plot(output[position_monitor][0]*1e-3, # time in second
              output[position_monitor][1][:,5,position_node],
-             color='g')
+             color='k')
     plt.show()
 
 def print_region(path,time_begin,time_end,position_monitor,position_variable,nb_region):
