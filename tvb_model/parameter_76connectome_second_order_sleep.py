@@ -71,9 +71,9 @@ parameter_integrator={
     'noise_parameter':{
         'nsig':[0.7e-08, 0.7e-08, 0.0, 0.0, 0.0, 0.0, 0.0], # in KHz
         'ntau':0.0,
-        'dt':0.5
+        'dt': 0.5
                         },
-    'dt':0.5 # in ms
+    'dt': 0.5 # in ms
 }
 
 parameter_monitor= {
