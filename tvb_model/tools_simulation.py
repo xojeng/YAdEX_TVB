@@ -1,5 +1,7 @@
 import Zerlaut
 import tvb.simulator.lab as lab
+from tvb.datatypes.time_series import TimeSeriesRegion
+import tvb.analyzers.fcd_matrix as fcd
 import numpy.random as rgn
 import numpy as np
 import noise as my_noise
@@ -58,6 +60,8 @@ def init(parameter_simulation,parameter_model,parameter_connection_between_regio
     model.T=parameter_model['T']
     model.P_e=parameter_model['P_e']
     model.P_i=parameter_model['P_i']
+    model.K_ext_e=parameter_model['K_ext_e']
+    model.K_ext_i=parameter_model['K_ext_i']
     model.external_input_ex_ex=parameter_model['external_input_ex_ex']
     model.external_input_ex_in=parameter_model['external_input_ex_in']
     model.external_input_in_ex=parameter_model['external_input_in_ex']
@@ -81,10 +85,15 @@ def init(parameter_simulation,parameter_model,parameter_connection_between_regio
         connection = lab.connectivity.Connectivity(number_of_regions=tract_lengths.shape[0],
                                                tract_lengths=tract_lengths,
                                                weights=weights)
+    elif parameter_connection_between_region['from_h5']:
+       connection = lab.connectivity.Connectivity().from_file(parameter_connection_between_region['path'])
     else:
         connection = lab.connectivity.Connectivity(number_of_regions=parameter_connection_between_region['number_of_regions'],
                                                tract_lengths=parameter_connection_between_region['tract_lengths'],
                                                weights=parameter_connection_between_region['weights'],)
+
+    if 'normalised'in parameter_connection_between_region.keys() or parameter_connection_between_region['normalised']:
+        connection.weights = connection.weights/np.sum(connection.weights,axis=0)
     connection.speed = parameter_connection_between_region['speed']
 
 
@@ -321,19 +330,20 @@ def get_region(path,time_begin,time_end,region_nb):
         result = np.load(path+'/step_'+str(count)+'.npy')
         for i in range(result.shape[0]):
             tmp = np.array(result[i])
-            tmp = tmp[np.where((time_begin <= tmp[:,0]) &  (tmp[:,0]<= time_end)),:]
-            tmp_time = tmp[0][:,0]
-            if tmp_time.shape[0] != 0:
-                one = tmp[0][:,1][0]
-                tmp_value = np.concatenate(tmp[0][:,1]).reshape(tmp_time.shape[0],one.shape[0],one.shape[1])
-                tmp_value = tmp_value[:,:,region_nb]
-                if len(output) == nb_monitor:
-                    output[i]=[np.concatenate([output[i][0],tmp_time]),np.concatenate([output[i][1],tmp_value])]
-                else:
-                    output.append([tmp_time,tmp_value])
+            if len(tmp) != 0:
+                tmp = tmp[np.where((time_begin <= tmp[:,0]) &  (tmp[:,0]<= time_end)),:]
+                tmp_time = tmp[0][:,0]
+                if tmp_time.shape[0] != 0:
+                    one = tmp[0][:,1][0]
+                    tmp_value = np.concatenate(tmp[0][:,1]).reshape(tmp_time.shape[0],one.shape[0],one.shape[1])
+                    tmp_value = tmp_value[:,:,region_nb]
+                    if len(output) == nb_monitor:
+                        output[i]=[np.concatenate([output[i][0],tmp_time]),np.concatenate([output[i][1],tmp_value])]
+                    else:
+                        output.append([tmp_time,tmp_value])
     return output
 
-def print_all(path,time_begin,time_end,position_monitor,position_variable):
+def print_all_activity(path,time_begin,time_end,position_monitor,position_variable):
     '''
     print one value of on monitor for some times
     :param path: the folder of the simulation
@@ -462,4 +472,281 @@ def print_bistability(parameter_model):
     import matplotlib.pyplot as plt
     plt.plot(xrange1,feprimovec,'k-',xrange1,xrange1,'k--')
     plt.plot(fiprimovec,feprimovec,'r-')
+    plt.show()
+
+
+def print_space_variable(path,time_begin,time_end,position_monitor,limit=True):
+    output = get_result(path,time_begin,time_end)
+    sys.path.append(path)
+    import parameter
+    simulator = init(parameter.parameter_simulation,
+                      parameter.parameter_model,
+                      parameter.parameter_connection_between_region,
+                      parameter.parameter_coupling,
+                      parameter.parameter_integrator,
+                      parameter.parameter_monitor)
+    sys.path.remove(path)
+
+    import matplotlib.pyplot as plt
+    import matplotlib.gridspec as gridspec
+    for region in range(output[position_monitor][1].shape[2]):
+        delays = simulator.history.delays[region,:]
+        weight = simulator.history.weights[region,:]
+        initial_condition = np.load(path+'/step_init.npy')
+        output_init = np.concatenate((initial_condition[:,0,:,0],output[0][1][:,0,:]))
+        for index,delay in enumerate(delays):
+            output_init[:,index] = np.concatenate((np.zeros(int(delay)+1),output_init[:-int(delay)-1,index]))
+        max_time = len(output[position_monitor][1][:,0,region])
+        External_input = np.ones((max_time,1))
+        for t in range(max_time):
+            tmp = np.sum(output_init[-max_time+t]*weight)
+            External_input[t] = simulator.coupling.post(tmp)
+        fig = plt.figure(figsize=(20,8))
+        gs1 = gridspec.GridSpec(3, 3,figure=fig)
+        axs = np.array([[plt.subplot(gs1[0, 0]),plt.subplot(gs1[0, 1])],[plt.subplot(gs1[1, 0]), plt.subplot(gs1[1, 1])]])
+
+        plt.suptitle('Analysis of region'+str(region), fontsize=16)
+        axs[0,0].set_title('Firing rate excitatory vs firing rate inhibitory')
+        axs[0,0].plot(
+            output[position_monitor][1][:,1,region],
+            output[position_monitor][1][:,0,region]
+            )
+        axs[0,0].set_ylabel('Firing rate excitatory')
+        axs[0,0].set_xlabel('Firing rate inhibitory')
+        if limit:
+            axs[0,0].set_ylim(ymin=-0.001,ymax=0.02)
+            axs[0,0].set_xlim(xmin=-0.001,xmax=0.03)
+
+        axs[0,1].plot(
+            output[position_monitor][1][:,5,region],
+            output[position_monitor][1][:,0,region],
+            )
+        axs[0,1].set_ylabel('Firing rate excitatory')
+        axs[0,1].set_xlabel('Adaptation')
+        axs[0,1].set_title('Firing rate excitatory vs Adaptation', fontsize=16)
+        if limit:
+            axs[0,1].set_ylim(ymin=-0.001,ymax=0.02)
+            axs[0,1].set_xlim(xmin=-1.0,xmax=120.0)
+
+        nb_time = len(output[position_monitor][1][:,0,region])
+        axs[1,0].plot(
+            External_input,
+            output[position_monitor][1][:,0,region],
+            )
+        axs[1,0].set_ylabel('Firing rate excitatory')
+        axs[1,0].set_xlabel('External input')
+        axs[1,0].set_title('Firing rate excitatory vs External input', fontsize=16)
+        if limit:
+            axs[1,0].set_ylim(ymin=-0.001,ymax=0.02)
+            axs[1,0].set_xlim(xmin=0.00,xmax=0.008)
+
+        axs[1,1].plot(
+            output[position_monitor][1][:,5,region],
+            External_input
+            )
+        axs[1,1].set_xlabel('Adaptation')
+        axs[1,1].set_ylabel('External input')
+        axs[1,1].set_title('Adaptation vs External input', fontsize=16)
+        if limit:
+            axs[1,1].set_ylim(ymin=0.0,ymax=0.008)
+            axs[1,1].set_xlim(xmin=-1.0,xmax=120.0)
+
+        ax_time = plt.subplot(gs1[2, :])
+        ax_time.plot(
+            output[position_monitor][0],
+            output[position_monitor][1][:,0,region],
+            )
+        ax_time.plot(
+            output[position_monitor][0],
+            output[position_monitor][1][:,1,region],
+            )
+        ax_time.set_xlabel('time')
+        ax_time.set_ylabel('Firing rate')
+        ax_time.set_title('time', fontsize=16)
+        if limit:
+            ax_time.set_ylim(ymin=0.0,ymax=0.03)
+
+        from mpl_toolkits.mplot3d import Axes3D
+        axbig = plt.subplot(gs1[:2, 2], projection='3d')
+        axbig.plot(output[position_monitor][1][:,1,region],
+            output[position_monitor][1][:,0,region],
+           output[position_monitor][1][:,5,region],
+                )
+        axbig.set_ylabel('Firing rate excitatory')
+        axbig.set_xlabel('Firing rate inhibitory')
+        axbig.set_zlabel('Adapation')
+        if limit:
+            axbig.set_ylim(ymin=-0.001,ymax=0.02)
+            axbig.set_xlim(xmin=-0.001,xmax=0.03)
+            axbig.set_zlim(zmin=-1.0,zmax=120.0)
+
+        plt.savefig(path+'/region'+str(region)+'.png')
+        plt.close('all')
+
+def print_all(path, time_begin, time_end, position_monitor,con,size=0.031, shift=0.0, E_I=True,title=None,drop_mean=False ):
+    '''
+    print one value of on monitor for some times
+    :param path: the folder of the simulation
+    :param time_begin: the start time for the result
+    :param time_end: the ending time for the result
+    :param position_monitor: select the monitor
+    :param position_variable: select the variable of monitor
+    :return: nothing
+    '''
+    output = get_result(path, time_begin, time_end)
+    import matplotlib.pyplot as plt
+    plt.figure(figsize=(20,20))
+    nb_region =output[position_monitor][1].shape[2]
+    for i in range(nb_region):
+        if drop_mean:
+            mean = np.mean(output[position_monitor][1][:, 0, i])
+        else:
+            mean =0.0
+        if E_I:
+            plt.plot(output[position_monitor][0] * 1e-3,  # time in second
+                     output[position_monitor][1][:, 0, i]+size*i+shift,
+                     linewidth=0.5,
+                     color='r'
+                     )
+            plt.plot(output[position_monitor][0] * 1e-3,  # time in second
+                     output[position_monitor][1][:, 1, i]+size*i+shift,
+                     color='b',
+                     linewidth=0.5,
+                     )
+        else:
+            plt.plot(output[position_monitor][0] * 1e-3,  # time in second
+            output[position_monitor][1][:, 0, i]+size*i+shift-mean,
+            color='b',
+            linewidth=0.5,
+            )
+    plt.xlim(xmax=time_end*1e-3+0.1,xmin=time_begin*1e-3-0.1)
+    plt.ylim(ymin=-size/2,ymax=nb_region*size)
+    plt.xlabel('time in s', {'fontsize': 20})
+    plt.ylabel('regions',{'fontsize': 20})
+    plt.yticks(np.arange(0,nb_region,1)*size,con.region_labels)
+    if title is not None:
+        plt.title(title)
+    plt.show()
+
+
+def compute_fc(con, bold_data, parameter_monitor):
+    import tvb.analyzers.correlation_coefficient as corr_coeff
+    from tvb.datatypes.time_series import TimeSeriesRegion
+
+    bold_period = parameter_monitor['parameter_Bold']['period']
+    # Remove transient
+    bold_data = bold_data[10:, :, :]
+
+    tsr = TimeSeriesRegion(connectivity=con,
+                            data=bold_data,
+                            sample_period=bold_period)
+    tsr.configure()
+    # Compute FC
+    corrcoeff_analyser = corr_coeff.CorrelationCoefficient(time_series=tsr)
+    corrcoeff_data = corrcoeff_analyser.evaluate()
+    corrcoeff_data.configure()
+    FC = corrcoeff_data.array_data[..., 0, 0]
+    return FC
+
+def plot_fc_matrix(FC, plot_name=None, plot_region_names=False, con=None):
+    import matplotlib.pyplot as plt
+    fig=plt.figure(figsize=(8,8))
+    cs=plt.imshow(FC, interpolation='nearest', aspect='equal', cmap='jet')
+    if plot_region_names == True:
+        con.number_of_regions = len(con.region_labels)     #number of regions
+        plt.xticks(range(0, con.number_of_regions), con.region_labels, fontsize=7, rotation=90)
+        plt.yticks(range(0, con.number_of_regions), con.region_labels, fontsize=7)
+    else:
+        pass
+    cb=plt.colorbar(shrink=0.23)
+#     cb.set_ticklabels([-0.1, 0, 0.5, 1])
+    cb.set_label('PCC', fontsize=15)
+    cs.set_clim(0, 1.0)
+    if plot_name == None:
+        title = 'FC_matrix_'
+    else:
+        title = 'FC_matrix_%s'%(plot_name)
+    plt.title(title, fontsize=20)
+    plt.show()
+
+def compute_fcd(con, bold_data,parameter_monitor,wind_len=180e3,wind_sp=4e3):
+    bold_period = parameter_monitor['parameter_Bold']['period']
+
+    # Build the time series object
+    tsr = TimeSeriesRegion(connectivity=con,
+                            data=bold_data,
+                            sample_period=bold_period)
+    tsr.configure()
+
+    # Create and evaluate the analysis
+
+    fcd_analyser = fcd.FcdCalculator(time_series=tsr, sw=wind_len, sp=wind_sp)
+    fcd_data = fcd_analyser.evaluate()
+    # Store the results
+    FCD=fcd_data[0][:,:,0,0]
+    return FCD
+
+def plot_fcd_matrix(fcd, plot_name=None):
+    import matplotlib.pyplot as plt
+    FCD = fcd
+    # plt.subplot(121)
+    cs=plt.imshow(FCD, cmap='jet', aspect='equal')
+    axcb =plt.colorbar(ticks=[0, 0.5, 1])
+    axcb.set_label(r'CC [FC($t_i$), FC($t_j$)]', fontsize=20)
+    cs.set_clim(0, 1.0)
+    for t in axcb.ax.get_yticklabels():
+        t.set_fontsize(18)
+    plt.xticks([0,len(FCD)/2-1, len(FCD)-1],['0','10', '20'], fontsize=18)
+    plt.yticks([0,len(FCD)/2-1, len(FCD)-1],['0','10', '20'], fontsize=18)
+    plt.xlabel(r'Time $t_j$ (min)', fontsize=20)
+    plt.ylabel(r'Time $t_i$ (min)', fontsize=20)
+
+    if plot_name == None:
+        title = 'FCD'
+    else:
+        title = 'FCD_%s'%(plot_name)
+
+    plt.title(title, fontsize=20)
+    plt.show()
+
+def plot_fc_fcd_matrix(FC,FCD,plot_name=None,plot_region_names=None,con=None):
+    import matplotlib.pyplot as plt
+    plt.figure(figsize=(20,20))
+    plt.subplot(121)
+    cb=plt.imshow(FC, interpolation='nearest', aspect='equal', cmap='jet')
+    if plot_region_names == True:
+        con.number_of_regions = len(con.region_labels)     #number of regions
+        plt.xticks(range(0, con.number_of_regions), con.region_labels, fontsize=18, rotation=90)
+        plt.yticks(range(0, con.number_of_regions), con.region_labels, fontsize=18)
+    else:
+        pass
+    axecb=plt.colorbar(ticks=[-1.0,-0.5, 0.0, 0.5, 1.0])
+    axecb.ax.tick_params(labelsize=18)
+    axecb.set_label('PCC', fontsize=15)
+    cb.set_clim(-1.0, 1.0)
+    if plot_name == None:
+        title = 'FC_matrix_'
+    else:
+        title = 'FC_matrix_%s'%(plot_name)
+    plt.title(title, fontsize=20)
+
+
+    plt.subplot(122)
+    cs=plt.imshow(FCD, cmap='jet', aspect='equal')
+    axcb =plt.colorbar(ticks=[-1.0,-0.5, 0.0, 0.5, 1.0])
+    axcb.set_label(r'CC [FC($t_i$), FC($t_j$)]', fontsize=20)
+    cs.set_clim(-1.0, 1.0)
+    for t in axcb.ax.get_yticklabels():
+        t.set_fontsize(18)
+    plt.xticks([0,len(FCD)/2-1, len(FCD)-1],['0','10', '20'], fontsize=18)
+    plt.yticks([0,len(FCD)/2-1, len(FCD)-1],['0','10', '20'], fontsize=18)
+    plt.xlabel(r'Time $t_j$ (min)', fontsize=20)
+    plt.ylabel(r'Time $t_i$ (min)', fontsize=20)
+
+    if plot_name == None:
+        title = 'FCD'
+    else:
+        title = 'FCD_%s'%(plot_name)
+
+    plt.title(title, fontsize=20)
     plt.show()
