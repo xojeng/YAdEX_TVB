@@ -17,7 +17,7 @@ DT=0.1
 defaultclock.dt = DT*ms
 N1 = 2000
 N2 = 8000
-TotTime = 0.5e3
+TotTime = 5000
 # TotTime=10
 duration = TotTime*ms
 seed(50)
@@ -64,7 +64,7 @@ G1.Ei=-80.*mV
 G1.Tsyn=5.*ms
 
 # Population 2 - RS - excitatory
-b2 = 15.0*pA
+b2 = 20.0*pA
 G2 = NeuronGroup(N2, eqs, threshold='v > 0.0*mV', reset='v = -63.0*mV; w += b2', refractory='5*ms',  method='heun')
 G2.Cm = 200.*pF
 G2.El = -63.0*mV
@@ -180,24 +180,24 @@ ax2=fig.add_subplot(222)
 
 for a in range(1):
     ax1.plot(Lt1G1, LVG1[a],'r:',linewidth=0.5)
-    ax1.plot(Lt1G2, LVG2[a],'g:',linewidth=0.5)
+    ax1.plot(Lt1G2, LVG2[a],color='steelblue',linewidth=0.5)
 
 for a in range(5):
     ax2.plot(Lt2G1, LwG1[a],'r:',linewidth=0.5)
-    ax2.plot(Lt2G2, LwG2[a],'g:',linewidth=0.5)
+    ax2.plot(Lt2G2, LwG2[a],color='steelblue',linewidth=0.5)
 
 ax1.plot(Lt1G1, mean_LVG1,'r',linewidth=2.0)
 ax2.plot(Lt2G1, mean_LwG1,'r',linewidth=2.0)
-ax1.plot(Lt1G2, mean_LVG2,'g',linewidth=2.0)
-ax2.plot(Lt2G2, mean_LwG2,'g',linewidth=2.0)
+ax1.plot(Lt1G2, mean_LVG2,color='steelblue',linewidth=2.0)
+ax2.plot(Lt2G2, mean_LwG2,color='steelblue',linewidth=2.0)
 # ax1.plot(Lt1G1, max_LVG1,'r--',linewidth=0.5)
 ax2.plot(Lt2G1, max_LwG1,'r--',linewidth=1.0)
-# ax1.plot(Lt1G2, max_LVG2,'g--',linewidth=0.5)
-ax2.plot(Lt2G2, max_LwG2,'g--',linewidth=1.0)
+# ax1.plot(Lt1G2, max_LVG2,color='steelblue',linewidth=0.5)
+ax2.plot(Lt2G2, max_LwG2,color='steelblue',linewidth=1.0)
 ax1.plot(Lt1G1, min_LVG1,'r--',linewidth=0.5)
 ax2.plot(Lt2G1, min_LwG1,'r--',linewidth=1.0)
-ax1.plot(Lt1G2, min_LVG2,'g--',linewidth=0.5)
-ax2.plot(Lt2G2, min_LwG2,'g--',linewidth=1.0)
+ax1.plot(Lt1G2, min_LVG2,color='steelblue',linewidth=0.5)
+ax2.plot(Lt2G2, min_LwG2,color='steelblue',linewidth=1.0)
 
 
 ax1.set_ylim([-100, 0])
@@ -208,13 +208,13 @@ ax2.set_ylabel('W in (pA)')
 
 ax3=fig.add_subplot(223)
 ax3.plot(RasG1[0], RasG1[1], '.r',markersize=0.1)
-ax3.plot(RasG2[0], RasG2[1], '.g',markersize=0.1)
+ax3.plot(RasG2[0], RasG2[1], color='steelblue',markersize=0.1)
 ax3.set_xlabel('Time (ms)')
 ax3.set_ylabel('Neuron index')
 
 ax4=fig.add_subplot(224)
 ax4.plot(TimBinned,popRateG1, 'r')
-ax4.plot(TimBinned,popRateG2, 'g')
+ax4.plot(TimBinned,popRateG2, color='steelblue',markersize=0.1)
 ax4.set_xlabel('Time (ms)')
 ax4.set_ylabel('FR')
 
