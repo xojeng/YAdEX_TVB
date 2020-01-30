@@ -40,6 +40,9 @@ Ei:volt
 Tsyn:second
 '''#% neuron_params
 
+# New params: number of external connections
+K_ext_e= 400,
+K_ext_i= 0
 
 # Population 1 - FS - inhibitory
 b1 = 0.0*pA
