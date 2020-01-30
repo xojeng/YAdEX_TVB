@@ -15,11 +15,12 @@ start_scope()
 # parameters
 DT=0.1
 defaultclock.dt = DT*ms
-N1 = 2000#2000
-N2 = 8000#8000
-TotTime = 5e3
+N1 = 2000
+N2 = 8000
+TotTime = 0.5e3
+# TotTime=10
 duration = TotTime*ms
-seed(100)
+seed(50)
 
 eqs='''
 dv/dt = (-GsynE*(v-Ee)-GsynI*(v-Ei)-gl*(v-El)+ gl*Dt*exp((v-Vt)/Dt)-w + Is)/Cm : volt (unless refractory)
@@ -51,32 +52,32 @@ G1.GsynE=0.0*nS
 #parameters
 G1.Cm = 200.*pF
 G1.gl = 10.*nS
+G1.Is = 0.0
+G1.a = 0.0*nS
 G1.El = -65.0*mV
 G1.Vt = -50.*mV
 G1.Dt = 0.5*mV
 G1.tau_w = 1.0*ms
-G1.a = 0.0*nS
-G1.Is = 0.0 #[0.0 for i in range(N1)]*nA
 
 G1.Ee=0.*mV
 G1.Ei=-80.*mV
 G1.Tsyn=5.*ms
 
 # Population 2 - RS - excitatory
-b2 = 7.*pA
-G2 = NeuronGroup(N2, eqs, threshold='v > 0.0*mV', reset='v = -64.5*mV; w += b2', refractory='5*ms',  method='heun')
-G2.v = -70.*mV
+b2 = 15.0*pA
+G2 = NeuronGroup(N2, eqs, threshold='v > 0.0*mV', reset='v = -63.0*mV; w += b2', refractory='5*ms',  method='heun')
+G2.Cm = 200.*pF
+G2.El = -63.0*mV
+G2.gl = 10.*nS
+G2.Is = 0.0*nA
+G2.a = 0.*nS
+G2.Dt = 2.*mV
+G2.tau_w = 500.*ms
+G2.Vt = -50.*mV
+G2.v = -63.0*mV
 G2.w = 0.0*pA
 G2.GsynI=0.0*nS
 G2.GsynE=0.0*nS
-G2.Cm = 200.*pF
-G2.gl = 10.*nS
-G2.El = -64.5*mV
-G2.Vt = -50.*mV
-G2.Dt = 2.*mV
-G2.tau_w = 500.*ms
-G2.a = 0.*nS
-G2.Is = 0.0*nA
 
 G2.Ee=0.*mV
 G2.Ei=-80.*mV
@@ -84,12 +85,14 @@ G2.Tsyn=5.*ms
 
 
 # external drive--------------------------------------------------------------------------
-
-P_ed_1=PoissonGroup(N1, 140*2.0*Hz)
-P_ed_2=PoissonGroup(N2, 140*2.0*Hz)
+rate = 300.0
+nb_P = 10
+P_ed_1 = PoissonGroup(N1*nb_P, (rate/nb_P)*Hz)
+P_ed_2 = PoissonGroup(N2*nb_P, (rate/nb_P)*Hz)
 
 # connections-----------------------------------------------------------------------------
 
+print("connection")
 Qi=2.5*nS
 Qe=1.*nS
 
@@ -99,28 +102,28 @@ S_12 = Synapses(G1, G2, on_pre='GsynI_post+=Qi')
 S_12.connect(p=prbC2)
 
 S_11 = Synapses(G1, G1, on_pre='GsynI_post+=Qi')
-S_11.connect('i!=j',p=prbC2)
+S_11.connect(condition='i != j',p=prbC2)
 
 S_21 = Synapses(G2, G1, on_pre='GsynE_post+=Qe')
 S_21.connect(p=prbC)
 
 S_22 = Synapses(G2, G2, on_pre='GsynE_post+=Qe')
-S_22.connect('i!=j', p=prbC)
+S_22.connect(condition='i != j', p=prbC)
 
 S_ed_in = Synapses(P_ed_1, G1, on_pre='GsynE_post+=Qe')
-S_ed_in.connect('i==j',p=1.0)
+S_ed_in.connect(condition='j == i % N1')
 
 S_ed_ex = Synapses(P_ed_2, G2, on_pre='GsynE_post+=Qe')
-S_ed_ex.connect('i==j',p=1.0)
+S_ed_ex.connect(condition='j == i % N2')
 
 M1G1 = SpikeMonitor(G1)
-M2G1 = StateMonitor(G1, 'v', record=range(N1))
-M3G1 = StateMonitor(G1, 'w', record=range(N1))
+M2G1 = StateMonitor(G1, 'v', record=range(N1),dt=1*ms)
+M3G1 = StateMonitor(G1, 'w', record=range(N1),dt=1*ms)
 FRG1 = PopulationRateMonitor(G1)
 #
 M1G2 = SpikeMonitor(G2)
-M2G2 = StateMonitor(G2, 'v', record=range(N2))
-M3G2 = StateMonitor(G2, 'w', record=range(N2))
+M2G2 = StateMonitor(G2, 'v', record=range(N2),dt=1*ms)
+M3G2 = StateMonitor(G2, 'w', record=range(N2),dt=1*ms)
 FRG2 = PopulationRateMonitor(G2)
 
 print('--##Start simulation##--')
