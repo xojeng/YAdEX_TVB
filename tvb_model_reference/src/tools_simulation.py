@@ -1,10 +1,8 @@
-import Zerlaut
 import tvb.simulator.lab as lab
 from tvb.datatypes.time_series import TimeSeriesRegion
 import tvb.analyzers.fcd_matrix as fcd
 import numpy.random as rgn
 import numpy as np
-import noise as my_noise
 import json
 import os
 import subprocess
@@ -30,11 +28,16 @@ def init(parameter_simulation,parameter_model,parameter_connection_between_regio
     parameter_simulation['seed'] = my_seed
     rgn.seed(parameter_simulation['seed'])
 
+    if parameter_model['matteo']:
+        import tvb_model_reference.src.Zerlaut_matteo as model
+    else:
+       import tvb_model_reference.src.Zerlaut as model
+
     ## Model
     if parameter_model['order'] == 1:
-        model = Zerlaut.Zerlaut_adaptation_first_order(variables_of_interest='E I W_e W_i'.split())
+        model = model.Zerlaut_adaptation_first_order(variables_of_interest='E I W_e W_i noise'.split())
     elif parameter_model['order'] == 2:
-        model = Zerlaut.Zerlaut_adaptation_second_order(variables_of_interest='E I C_ee C_ei C_ii W_e W_i'.split())
+        model = model.Zerlaut_adaptation_second_order(variables_of_interest='E I C_ee C_ei C_ii W_e W_i noise'.split())
     else:
         raise Exception('Bad order for the model')
 
@@ -67,6 +70,8 @@ def init(parameter_simulation,parameter_model,parameter_connection_between_regio
     model.external_input_ex_in=parameter_model['external_input_ex_in']
     model.external_input_in_ex=parameter_model['external_input_in_ex']
     model.external_input_in_in=parameter_model['external_input_in_in']
+    model.tau_OU=parameter_model['tau_OU']
+    model.weight_noise=parameter_model['weight_noise']
     model.state_variable_range['E'] = parameter_model['initial_condition']['E']
     model.state_variable_range['I'] = parameter_model['initial_condition']['I']
     if parameter_model['order'] == 2:
@@ -93,7 +98,7 @@ def init(parameter_simulation,parameter_model,parameter_connection_between_regio
                                                tract_lengths=parameter_connection_between_region['tract_lengths'],
                                                weights=parameter_connection_between_region['weights'],)
 
-    if 'normalised'in parameter_connection_between_region.keys() or parameter_connection_between_region['normalised']:
+    if 'normalised'in parameter_connection_between_region.keys() and parameter_connection_between_region['normalised']:
         connection.weights = connection.weights/np.sum(connection.weights,axis=0)
     connection.speed = parameter_connection_between_region['speed']
 
@@ -103,7 +108,7 @@ def init(parameter_simulation,parameter_model,parameter_connection_between_regio
     if parameter_stimulation is None:
         stimulation = None
     else:
-        eqn_t = lab.equations.PulseTrain(equation="where((var % T) < tau, amp, 0)*sin(var)")
+        eqn_t = lab.equations.PulseTrain()
         eqn_t.parameters["onset"] = parameter_stimulation["onset"] # ms
         eqn_t.parameters["tau"]   = parameter_stimulation["tau"] # ms
         eqn_t.parameters["T"]     = parameter_stimulation["T"] # ms; # 0.02kHz repetition frequency
@@ -168,23 +173,9 @@ def init(parameter_simulation,parameter_model,parameter_connection_between_regio
         else:
             raise Exception('Bad type for the integrator')
     else:
-        if parameter_integrator['noise_type'] == 'Ornstein_Ulhenbeck_process':
-            noise = my_noise.Ornstein_Ulhenbeck_process(
-                mu=parameter_integrator['noise_parameter']['mu'],
-                nsig=parameter_integrator['noise_parameter']['nsig'],
-                tau_OU=parameter_integrator['noise_parameter']['tau_OU'],
-                ntau=parameter_integrator['noise_parameter']['ntau'],
-                weights=parameter_integrator['noise_parameter']['weight'],
-            )
-        elif parameter_integrator['noise_type'] == 'Additive':
+        if parameter_integrator['noise_type'] == 'Additive':
             noise = lab.noise.Additive(nsig=parameter_integrator['noise_parameter']['nsig'],
-                                                        ntau=parameter_integrator['noise_parameter']['ntau'],)
-        elif parameter_integrator['noise_type'] == 'Ornstein_Ulhenbeck_process':
-            noise = lab.noise.Multiplicative(
-                nsig=parameter_integrator['noise_parameter']['nsig'],
-                ntau=parameter_integrator['noise_parameter']['ntau'],
-                b=parameter_integrator['noise_parameter']['b'],
-            )
+                                        ntau=parameter_integrator['noise_parameter']['ntau'],)
         else:
             raise Exception('Bad type for the noise')
         noise.random_stream.seed(parameter_simulation['seed'])
@@ -227,7 +218,7 @@ def init(parameter_simulation,parameter_model,parameter_connection_between_regio
         json.dump(dic, f)
         f.write("\n")
     f.close()
-    subprocess.call(['./correct_parameter.sh',parameter_simulation['path_result']+'/parameter.py']) ##Warning can be do'nt find the script
+    subprocess.call([os.path.dirname(os.path.abspath(__file__))+'/correct_parameter.sh',parameter_simulation['path_result']+'/parameter.py']) ##Warning can be do'nt find the script
 
 
     #initialize the simulator: edited by TA and Jen, added stimulation argument, try removing surface
@@ -409,18 +400,22 @@ def print_region(path,time_begin,time_end,position_monitor,position_variable,nb_
              )
     plt.show()
 
-def print_bistability(parameter_model):
+def print_bistability(parameter_model,show=True):
     '''
     print if the model is bistable or not
     :param parameter_model: parameters for the model
         (the parameter external_input_in_in and external_input_in_ex is taking in count)
     :return: nothing
     '''
+    if parameter_model['matteo']:
+        import tvb_model_reference.src.Zerlaut_matteo as model
+    else:
+        import tvb_model_reference.src.Zerlaut as model
     ## Model
     if parameter_model['order'] == 1:
-        model = Zerlaut.Zerlaut_adaptation_first_order(variables_of_interest='E I W_e W_i'.split())
+        model = model.Zerlaut_adaptation_first_order(variables_of_interest='E I W_e W_i'.split())
     elif parameter_model['order'] == 2:
-        model = Zerlaut.Zerlaut_adaptation_second_order(variables_of_interest='E I C_ee C_ei C_ii W_e W_i'.split())
+        model = model.Zerlaut_adaptation_second_order(variables_of_interest='E I C_ee C_ei C_ii W_e W_i'.split())
     else:
         raise Exception('Bad order for the model')
 
@@ -478,9 +473,12 @@ def print_bistability(parameter_model):
         fiprimovec[i]=fizero
         # print(i,np.array(xrange1[i]),fezeroprime,fizero)
     import matplotlib.pyplot as plt
-    plt.plot(xrange1,feprimovec,'k-',xrange1,xrange1,'k--')
+    plt.figure()
+    plt.plot(xrange1*1e3,feprimovec*1e3,'k-',xrange1*1e3,xrange1*1e3,'k--')
     # plt.plot(fiprimovec,feprimovec,'r-')
-    plt.show()
+    if show:
+        plt.show()
+    return xrange1,feprimovec
 
 
 def print_space_variable(path,time_begin,time_end,position_monitor,limit=True):

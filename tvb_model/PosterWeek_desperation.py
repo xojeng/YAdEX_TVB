@@ -1,10 +1,10 @@
 import tools_simulation
-import parameter_PosterWeek_desperation_disconnected
+import  parameter_Matteo as parameter_PosterWeek_desperation_disconnected
 import numpy as np
 import utils
 import matplotlib.pyplot as plt
 
-t=10000.0
+t=10.0
 
 parameter_PosterWeek_desperation_disconnected.parameter_simulation['path_result']='./posterweek_apoint2_b0_disconnected'
 
@@ -19,20 +19,21 @@ tools_simulation.run_simulation(simulator,
                                parameter_PosterWeek_desperation_disconnected.parameter_simulation,
                                parameter_PosterWeek_desperation_disconnected.parameter_monitor)
 
-# tools_simulation.print_all(parameter_PosterWeek_desperation_disconnected.parameter_simulation['path_result'],
-#                           0.0,t,
-#                           0,0)
+tools_simulation.print_all(parameter_PosterWeek_desperation_disconnected.parameter_simulation['path_result'],
+                          0.0,t,
+                          0,0)
 #
 # tools_simulation.print_all(parameter_PosterWeek_desperation_disconnected.parameter_simulation['path_result'],
 #                           0.0,t,
 #                           0,5)
 
-tools_simulation.print_EI_one(parameter_PosterWeek_desperation_disconnected.parameter_simulation['path_result'],
-                             0.0,t,
-                            0,0)
+# tools_simulation.print_EI_one(parameter_PosterWeek_desperation_disconnected.parameter_simulation['path_result'],
+#                              0.0,t,
+#                             0,0)
 
-# the_data = tools_simulation.get_result(parameter_PosterWeek_desperation_disconnected.parameter_simulation['path_result'], 0.0, t)
-#
+the_data = tools_simulation.get_result(parameter_PosterWeek_desperation_disconnected.parameter_simulation['path_result'], 0.0, t)
+utils.multiview(the_data[0][1][0,0,utils.cortex.region_mapping], zmin=0.0, zmax = 0.02, shaded=False)
+
 # for time_step in range(int(t*10)):
 #     data  = the_data[0][1][time_step,0,utils.cortex.region_mapping]
 #     utils.multiview(data, zmin=0.0, zmax = 0.02, shaded=False)

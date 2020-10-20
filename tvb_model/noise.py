@@ -1,32 +1,37 @@
-from tvb.simulator.noise import Additive, Noise, NArray,Int, Attr, simple_gen_astr, Float
+from tvb.simulator.noise import Additive,Noise,RandomStream
+from tvb.datatypes import arrays
 import numpy
+from tvb.basic.traits import types_basic as basic
 
 class  Ornstein_Ulhenbeck_process (Additive):
-    tau_OU = Float(
+    tau_OU = basic.Float(
         label="time scale of decay",
         required=True,
-        default=0.0,
+        default=1.0,
         doc="""The noise time scale """)
-    mu = NArray(
+    mu = arrays.FloatArray(
         label=":math:`mu`",
         required=True,
         default=numpy.array([1.0]),
         doc="""Mean of noise noise"""
     )
-    weights=NArray(
+    weights=arrays.FloatArray(
         label=":math:`mu`",
         required=True,
         default=numpy.array([0.0]),
         doc="""Mean of noise noise"""
     )
-    _noise= None        """
+    _noise= None
+
+    def configure_white(self,dt,shape):
+        """
         Run base classes configure to setup traited attributes, then ensure that
         the ``random_stream`` attribute is properly configured.
 
         """
         self.dt = dt
         self._noise = 0.0
-        self.log.info('White noise configured with dt=%g', self.dt)
+        self.mu = numpy.reshape(self.mu,(7,1,1))
 
     def generate(self, shape, lo=-1.0, hi=1.0):
         self._noise = self._noise - self.dt/self.tau_OU*self._noise+numpy.sqrt(self.dt)*self.random_stream.normal(size=shape)
@@ -43,26 +48,25 @@ class  Ornstein_Ulhenbeck_process (Additive):
 
 
 class Poisson_noise(Noise):
-    nsig = NArray(
+    nsig = arrays.FloatArray(
         label=r"rate",
         required=True,
         default=numpy.array([0.0]),
         doc="""rate of neurons in Hz"""
     )
-    weights= NArray(
+    weights= arrays.FloatArray(
         label=r"unit firing rate",
         required=True,
         default=numpy.array([0.0]),
         doc="""TODO"""
     )
 
-    noise_seed = Int(
+    noise_seed = basic.Integer(
         default=42,
         doc="A random seed used to initialise the random_stream if it is missing."
     )
 
-    random_stream = Attr(
-        field_type=numpy.random.RandomState,
+    random_stream = RandomStream(
         required=False,
         label="Random Stream",
         doc="An instance of numpy's RandomState associated with this"
@@ -87,13 +91,9 @@ class Poisson_noise(Noise):
         # XXX: reseeding here will destroy a maybe carefully set random_stream!
         # self.random_stream.seed(self.noise_seed)
 
-    def __str__(self):
-        return simple_gen_astr(self, 'dt rate')
-
     def configure_white(self, dt, shape=None):
         """Set the time step (dt) of noise or integration time"""
         self.dt = dt
-        self.log.info('White noise configured with dt=%g', self.dt)
 
     def generate(self, shape, lo=0.0, hi=1.0):
         "Generate noise realization."

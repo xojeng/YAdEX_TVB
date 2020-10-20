@@ -1,5 +1,5 @@
 parameter_simulation={
-    'path_result':'./simulation_default',
+    'path_result':'./simulation_default_bold',
     'seed':10, # the seed for the random generator
     'save_time': 10000.0, # the time of simulation in each file
 }
@@ -9,7 +9,7 @@ parameter_model ={
     'order':2,
     #parameter of the model
     'g_L':10.0,
-    'E_L_e':-65.0,
+    'E_L_e':-60.0,
     'E_L_i':-65.0,
     'C_m':200.0,
     'b_e':60.0,
@@ -93,10 +93,10 @@ parameter_monitor= {
         'variables_of_interest':[0,1,2,3,4,5,6],
         'period':parameter_integrator['dt']*10.0
     },
-    'Bold':False,
+    'Bold':True,
     'parameter_Bold':{
         'variables_of_interest':[0],
-        'period':parameter_integrator['dt']*2000.0
+        'period':parameter_integrator['dt']*2.0*2000.0
     }
     # More monitor can be added
 }

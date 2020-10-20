@@ -316,6 +316,20 @@ class Zerlaut_adaptation_first_order(Model):
         doc="""external drive""",
         order=28)
 
+    tau_OU = arrays.FloatArray(
+        label=":math:`\ntau noise`",
+        default=numpy.array([5.0]),
+        range=basic.Range(lo=0.10, hi=10.0, step=0.01),
+        doc="""time constant noise""",
+        order=29)
+
+    weight_noise =  arrays.FloatArray(
+        label=":math:`\nweight noise`",
+        default=numpy.array([10.5]),
+        range=basic.Range(lo=0., hi=50.0, step=1.0),
+        doc="""weight noise""",
+        order=30)
+
     # Used for phase-plane axis ranges and to bound random initial() conditions.
     state_variable_range = basic.Dict(
         label="State Variable ranges [lo, hi]",
@@ -323,6 +337,7 @@ class Zerlaut_adaptation_first_order(Model):
                  "I": numpy.array([0.0, 0.0]),
                  "W_e": numpy.array([0.0,0.0]),
                  "W_i": numpy.array([0.0,0.0]),
+                 "noise": numpy.array([0.0,0.0]),
                      },
         doc="""The values for each state-variable should be set to encompass
         the expected dynamic range of that state-variable for the current
@@ -334,21 +349,21 @@ class Zerlaut_adaptation_first_order(Model):
         W_e: level of adaptation of excitatory in pA\n
         W_i: level of adaptation of inhibitory in pA\n
         """,
-        order=29)
+        order=31)
 
     variables_of_interest = basic.Enumerate(
         label="Variables watched by Monitors",
-        options=["E", "I","W_e","W_i"],
+        options=["E", "I","W_e","W_i","noise"],
         default=["E"],
         select_multiple=True,
         doc="""This represents the default state-variables of this Model to be
                monitored. It can be overridden for each Monitor if desired. The
                corresponding state-variable indices for this model are :math:`E = 0`,
                :math:`I = 1` and :math:`W = 2`.""",
-        order=30)
+        order=32)
 
-    state_variables = 'E I W_e W_i'.split()
-    _nvar = 4
+    state_variables = 'E I W_e W_i noise'.split()
+    _nvar = 5
     cvar = numpy.array([0], dtype=numpy.int32)
 
     def dfun(self, state_variables, coupling, local_coupling=0.00):
@@ -362,6 +377,7 @@ class Zerlaut_adaptation_first_order(Model):
         I = state_variables[1, :]
         W_e = state_variables[2, :]
         W_i = state_variables[3, :]
+        noise = state_variables[4, :]
         derivative = numpy.empty_like(state_variables)
 
         # long-range coupling
@@ -372,7 +388,7 @@ class Zerlaut_adaptation_first_order(Model):
         lc_I = local_coupling * I
 
         # external firing rate
-        Fe_ext = c_0 + lc_E
+        Fe_ext = c_0 + lc_E + self.weight_noise * noise
         Fi_ext = lc_I
 
         # Excitatory firing rate derivation
@@ -392,7 +408,7 @@ class Zerlaut_adaptation_first_order(Model):
                 W_e, self.Q_e, self.tau_e, self.E_e,
                 self.Q_i, self.tau_i, self.E_i,
                 self.g_L, self.C_m, self.E_L_e, self.N_tot,
-                self.p_connect, self.g,self.K_ext_e,self.K_ext_i)
+                self.p_connect_e, self.g,self.K_ext_e,self.K_ext_i)
         derivative[2] = -W_e/self.tau_w_e+self.b_e*E+self.a_e*(mu_V-self.E_L_e)/self.tau_w_e
         # Adaptation inhibitory
         mu_V, sigma_V, T_V = self.get_fluct_regime_vars(
@@ -401,8 +417,9 @@ class Zerlaut_adaptation_first_order(Model):
                 W_i, self.Q_e, self.tau_e, self.E_e,
                 self.Q_i, self.tau_i, self.E_i,
                 self.g_L, self.C_m, self.E_L_i, self.N_tot,
-                self.p_connect, self.g,self.K_ext_e,self.K_ext_i)
+                self.p_connect_i, self.g,self.K_ext_e,self.K_ext_i)
         derivative[3] = -W_i/self.tau_w_i+self.b_i*I+self.a_i*(mu_V-self.E_L_i)/self.tau_w_i
+        derivative[4] = -noise/self.tau_OU
 
         return derivative
 
@@ -604,6 +621,7 @@ class Zerlaut_adaptation_second_order(Zerlaut_adaptation_first_order):
                  "C_ii": numpy.array([0.0, 0.0]),  # variance is positive or null
                  "W_e":numpy.array([0.0, 0.0]),
                  "W_i":numpy.array([0.0, 0.0]),
+                 "noise":numpy.array([0.0, 0.0]),
                  },
         doc="""The values for each state-variable should be set to encompass
         the expected dynamic range of that state-variable for the current
@@ -617,21 +635,21 @@ class Zerlaut_adaptation_second_order(Zerlaut_adaptation_first_order):
         C_ie: the variance of the inhibitory population activity \n
         W: level of adaptation
         """,
-        order=29)
+        order=31)
 
     variables_of_interest = basic.Enumerate(
         label="Variables watched by Monitors",
-        options=["E", "I", "C_ee","C_ei","C_ii","W_e", "W_i"],
+        options=["E", "I", "C_ee","C_ei","C_ii","W_e", "W_i","noise"],
         default=["E"],
         select_multiple=True,
         doc="""This represents the default state-variables of this Model to be
                monitored. It can be overridden for each Monitor if desired. The
                corresponding state-variable indices for this model are :math:`E = 0`,
                :math:`I = 1`, :math:`C_ee = 2`, :math:`C_ei = 3`, :math:`C_ii = 4` and :math:`W = 5`.""",
-        order=30)
+        order=32)
 
-    state_variables = 'E I C_ee C_ei C_ii W_e W_i'.split()
-    _nvar = 7
+    state_variables = 'E I C_ee C_ei C_ii W_e W_i noise'.split()
+    _nvar = 8
 
     def dfun(self, state_variables, coupling, local_coupling=0.00):
         r"""
@@ -673,6 +691,7 @@ class Zerlaut_adaptation_second_order(Zerlaut_adaptation_first_order):
         C_ii = state_variables[4, :]
         W_e = state_variables[5,:]
         W_i = state_variables[6,:]
+        noise = state_variables[7,:]
         derivative = numpy.empty_like(state_variables)
 
         # long-range coupling
@@ -683,7 +702,9 @@ class Zerlaut_adaptation_second_order(Zerlaut_adaptation_first_order):
         lc_I = local_coupling * I
 
         # external firing rate for the different population
-        E_input_excitatory = c_0+lc_E+self.external_input_ex_ex
+        E_input_excitatory = c_0+lc_E+self.external_input_ex_ex + self.weight_noise * noise
+        index_bad_input = numpy.where( E_input_excitatory*self.K_ext_e + E*(1.-self.g)*self.p_connect_e*self.N_tot < 0)
+        E_input_excitatory[index_bad_input] = -E[index_bad_input]*(1.-self.g)*self.p_connect_e*self.N_tot/self.K_ext_e
         E_input_inhibitory = c_0+lc_E+self.external_input_in_ex
         I_input_excitatory = lc_I+self.external_input_ex_in
         I_input_inhibitory = lc_I+self.external_input_in_in
@@ -788,5 +809,6 @@ class Zerlaut_adaptation_second_order(Zerlaut_adaptation_first_order):
                 self.p_connect_e, self.p_connect_i, self.g,self.K_ext_e,self.K_ext_i)
         derivative[6] = -W_i/self.tau_w_i+self.b_i*I+self.a_i*(mu_V-self.E_L_i)/self.tau_w_i
 
+        derivative[7] = -noise/self.tau_OU
         return derivative
 

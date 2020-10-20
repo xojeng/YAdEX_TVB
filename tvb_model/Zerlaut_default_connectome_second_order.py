@@ -10,7 +10,7 @@ simulator = tools_simulation.init(parameter_default_connectome_second_order.para
                                   parameter_default_connectome_second_order.parameter_monitor)
 
 tools_simulation.run_simulation(simulator,
-                                100000.0,
+                                1200000.0,
                                 parameter_default_connectome_second_order.parameter_simulation,
                                 parameter_default_connectome_second_order.parameter_monitor)
 

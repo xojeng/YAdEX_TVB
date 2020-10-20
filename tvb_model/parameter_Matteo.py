@@ -48,7 +48,7 @@ parameter_connection_between_region={
     #from file (repertory with following files : tract_lengths.npy and weights.npy)
     'from_file':False,
     'from_h5':True,
-    'path':'/home/gpi/Desktop/TVB_Linux_1.5.4/Lionel_updates_Apr8/YAdEX_TVB/data/hcp-001.zip', #repertory of the files
+    'path':'/home/kusch/Documents/project/Zerlaut/YAdEX_TVB/data/hcp-001.zip', #repertory of the files
     # File description
     'number_of_regions':0, # number of region
     # lenghts of tract between region : dimension => (number_of_regions, number_of_regions)

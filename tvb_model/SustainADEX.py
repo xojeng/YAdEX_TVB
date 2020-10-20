@@ -17,7 +17,7 @@ DT=0.1
 defaultclock.dt = DT*ms
 N1 = 2000
 N2 = 8000
-TotTime = 5000
+TotTime = 1.0e3
 # TotTime=10
 duration = TotTime*ms
 seed(50)
@@ -67,7 +67,7 @@ G1.Ei=-80.*mV
 G1.Tsyn=5.*ms
 
 # Population 2 - RS - excitatory
-b2 = 20.0*pA
+b2 = 5.0*pA
 G2 = NeuronGroup(N2, eqs, threshold='v > 0.0*mV', reset='v = -63.0*mV; w += b2', refractory='5*ms',  method='heun')
 G2.Cm = 200.*pF
 G2.El = -63.0*mV
