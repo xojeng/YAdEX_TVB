@@ -2,7 +2,8 @@
 Mean field model based on Master equation about adaptative exponential leacky integrate and fire neurons population
 """
 
-from tvb.simulator.models.base import Model, LOG, numpy, basic, arrays, core
+from tvb.simulator.models.base import Model,  numpy
+from tvb.basic.neotraits.api import NArray, Range, Final, List
 import scipy.special as sp_spec
 from numba import jit
 
@@ -106,232 +107,204 @@ class Zerlaut_adaptation_first_order(Model):
                                   'external_input']
 
     # Define traited attributes for this model, these represent possible kwargs.
-    g_L = arrays.FloatArray(
+    g_L =  NArray(
         label=":math:`g_{L}`",
         default=numpy.array([10.]),  # 10 nS by default, i.e. ~ 100MOhm input resitance at rest
-        range=basic.Range(lo=0.1, hi=100.0, step=0.1),  # 0.1nS would be a very small cell, 100nS a very big one
-        doc="""leak conductance [nS]""",
-        order=1)
+        domain=Range(lo=0.1, hi=100.0, step=0.1),  # 0.1nS would be a very small cell, 100nS a very big one
+        doc="""leak conductance [nS]""")
 
-    E_L_e = arrays.FloatArray(
+    E_L_e = NArray(
         label=":math:`E_{L}`",
         default=numpy.array([-65.0]),
-        range=basic.Range(lo=-90.0, hi=-60.0, step=0.1),  # resting potential, usually between -85mV and -65mV
-        doc="""leak reversal potential for excitatory [mV]""",
-        order=2)
+        domain=Range(lo=-90.0, hi=-60.0, step=0.1),  # resting potential, usually between -85mV and -65mV
+        doc="""leak reversal potential for excitatory [mV]""")
 
-    E_L_i = arrays.FloatArray(
+    E_L_i = NArray(
         label=":math:`E_{L}`",
         default=numpy.array([-65.0]),
-        range=basic.Range(lo=-90.0, hi=-60.0, step=0.1),  # resting potential, usually between -85mV and -65mV
-        doc="""leak reversal potential for inhibitory [mV]""",
-        order=3)
+        domain=Range(lo=-90.0, hi=-60.0, step=0.1),  # resting potential, usually between -85mV and -65mV
+        doc="""leak reversal potential for inhibitory [mV]""")
 
     # N.B. Not independent of g_L, C_m should scale linearly with g_L
-    C_m = arrays.FloatArray(
+    C_m = NArray(
         label=":math:`C_{m}`",
         default=numpy.array([200.0]),
-        range=basic.Range(lo=10.0, hi=500.0, step=10.0),  # 20pF very small cell, 400pF very
-        doc="""membrane capacitance [pF]""",
-        order=4)
+        domain=Range(lo=10.0, hi=500.0, step=10.0),  # 20pF very small cell, 400pF very
+        doc="""membrane capacitance [pF]""")
 
-    b_e = arrays.FloatArray(
+    b_e = NArray(
         label=":math:`Excitatory b`",
         default=numpy.array([60.0]),
-        range=basic.Range(lo=0.0, hi=150.0, step=1.0),
-        doc="""Excitatory adaptation current increment [pA]""",
-        order=5)
+        domain=Range(lo=0.0, hi=150.0, step=1.0),
+        doc="""Excitatory adaptation current increment [pA]""")
 
-    a_e = arrays.FloatArray(
+    a_e = NArray(
         label=":math:`Excitatory a`",
         default=numpy.array([4.0]),
-        range=basic.Range(lo=0.0, hi=20.0, step=0.1),
-        doc="""Excitatory adaptation conductance [nS]""",
-        order=6)
+        domain=Range(lo=0.0, hi=20.0, step=0.1),
+        doc="""Excitatory adaptation conductance [nS]""")
 
-    b_i = arrays.FloatArray(
+    b_i = NArray(
         label=":math:`Inhibitory b`",
         default=numpy.array([0.0]),
-        range=basic.Range(lo=0.0, hi=100.0, step=0.1),
-        doc="""Inhibitory adaptation current increment [pA]""",
-        order=7)
+        domain=Range(lo=0.0, hi=100.0, step=0.1),
+        doc="""Inhibitory adaptation current increment [pA]""")
 
-    a_i = arrays.FloatArray(
+    a_i = NArray(
         label=":math:`Inhibitory a`",
         default=numpy.array([0.0]),
-        range=basic.Range(lo=0.0, hi=20.0, step=0.1),
-        doc="""Inhibitory adaptation conductance [nS]""",
-        order=8)
+        domain=Range(lo=0.0, hi=20.0, step=0.1),
+        doc="""Inhibitory adaptation conductance [nS]""")
 
-    tau_w_e = arrays.FloatArray(
+    tau_w_e = NArray(
         label=":math:`tau_w_e`",
         default=numpy.array([500.0]),
-        range=basic.Range(lo=1.0, hi=1000.0, step=1.0),
-        doc="""Adaptation time constant of excitatory neurons [ms]""",
-        order=9)
+        domain=Range(lo=1.0, hi=1000.0, step=1.0),
+        doc="""Adaptation time constant of excitatory neurons [ms]""")
 
-    tau_w_i = arrays.FloatArray(
+    tau_w_i = NArray(
         label=":math:`tau_w_e`",
         default=numpy.array([1.0]),
-        range=basic.Range(lo=1.0, hi=1000.0, step=1.0),
-        doc="""Adaptation time constant of inhibitory neurons [ms]""",
-        order=10)
+        domain=Range(lo=1.0, hi=1000.0, step=1.0),
+        doc="""Adaptation time constant of inhibitory neurons [ms]""")
 
-    E_e = arrays.FloatArray(
+    E_e = NArray(
         label=r":math:`E_e`",
         default=numpy.array([0.0]),
-        range=basic.Range(lo=-20., hi=20., step=0.01),
-        doc="""excitatory reversal potential [mV]""",
-        order=11)
+        domain=Range(lo=-20., hi=20., step=0.01),
+        doc="""excitatory reversal potential [mV]""")
 
-    E_i = arrays.FloatArray(
+    E_i = NArray(
         label=":math:`E_i`",
         default=numpy.array([-80.0]),
-        range=basic.Range(lo=-100.0, hi=-60.0, step=1.0),
-        doc="""inhibitory reversal potential [mV]""",
-        order=12)
+        domain=Range(lo=-100.0, hi=-60.0, step=1.0),
+        doc="""inhibitory reversal potential [mV]""")
 
-    Q_e = arrays.FloatArray(
+    Q_e = NArray(
         label=r":math:`Q_e`",
         default=numpy.array([1.5]),
-        range=basic.Range(lo=0.0, hi=5.0, step=0.1),
-        doc="""excitatory quantal conductance [nS]""",
-        order=13)
+        domain=Range(lo=0.0, hi=5.0, step=0.1),
+        doc="""excitatory quantal conductance [nS]""")
 
-    Q_i = arrays.FloatArray(
+    Q_i = NArray(
         label=r":math:`Q_i`",
         default=numpy.array([5.0]),
-        range=basic.Range(lo=0.0, hi=10.0, step=0.1),
-        doc="""inhibitory quantal conductance [nS]""",
-        order=14)
+        domain=Range(lo=0.0, hi=10.0, step=0.1),
+        doc="""inhibitory quantal conductance [nS]""")
 
-    tau_e = arrays.FloatArray(
+    tau_e = NArray(
         label=":math:`\tau_e`",
         default=numpy.array([5.0]),
-        range=basic.Range(lo=1.0, hi=10.0, step=1.0),
-        doc="""excitatory decay [ms]""",
-        order=15)
+        domain=Range(lo=1.0, hi=10.0, step=1.0),
+        doc="""excitatory decay [ms]""")
 
-    tau_i = arrays.FloatArray(
+    tau_i = NArray(
         label=":math:`\tau_i`",
         default=numpy.array([5.0]),
-        range=basic.Range(lo=0.5, hi=10.0, step=0.01),
-        doc="""inhibitory decay [ms]""",
-        order=16)
+        domain=Range(lo=0.5, hi=10.0, step=0.01),
+        doc="""inhibitory decay [ms]""")
 
-    N_tot = arrays.IntegerArray(
+    N_tot = NArray(
+        dtype=numpy.int,
         label=":math:`N_{tot}`",
         default=numpy.array([10000]),
-        range=basic.Range(lo=1000, hi=50000, step=1000),
-        doc="""cell number""",
-        order=17)
+        domain=Range(lo=1000, hi=50000, step=1000),
+        doc="""cell number""")
 
-    p_connect_e = arrays.FloatArray(
+    p_connect_e = NArray(
         label=":math:`\epsilon`",
         default=numpy.array([0.05]),
-        range=basic.Range(lo=0.001, hi=0.2, step=0.001),  # valid only for relatively sparse connectivities
-        doc="""connectivity probability""",
-        order=18)
+        domain=Range(lo=0.001, hi=0.2, step=0.001),  # valid only for relatively sparse connectivities
+        doc="""connectivity probability""")
 
-    p_connect_i = arrays.FloatArray(
+    p_connect_i = NArray(
         label=":math:`\epsilon`",
         default=numpy.array([0.05]),
-        range=basic.Range(lo=0.001, hi=0.2, step=0.001),  # valid only for relatively sparse connectivities
-        doc="""connectivity probability""",
-        order=18)
+        domain=Range(lo=0.001, hi=0.2, step=0.001),  # valid only for relatively sparse connectivities
+        doc="""connectivity probability""")
 
-    g = arrays.FloatArray(
+    g = NArray(
         label=":math:`g`",
         default=numpy.array([0.2]),
-        range=basic.Range(lo=0.01, hi=0.4, step=0.01),  # inhibitory cell number never overcomes excitatory ones
-        doc="""fraction of inhibitory cells""",
-        order=19)
+        domain=Range(lo=0.01, hi=0.4, step=0.01),  # inhibitory cell number never overcomes excitatory ones
+        doc="""fraction of inhibitory cells""")
 
-    K_ext_e = arrays.IntegerArray(
+    K_ext_e = NArray(
+        dtype=numpy.int,
         label=":math:`K_ext_e`",
         default=numpy.array([400]),
-        range=basic.Range(lo=0, hi=10000, step=1),  # inhibitory cell number never overcomes excitatory ones
-        doc="""Number of excitatory connexions from external population""",
-        order=20)
+        domain=Range(lo=0, hi=10000, step=1),  # inhibitory cell number never overcomes excitatory ones
+        doc="""Number of excitatory connexions from external population""")
 
-    K_ext_i = arrays.IntegerArray(
+    K_ext_i = NArray(
+        dtype=numpy.int,
         label=":math:`K_ext_i`",
         default=numpy.array([0]),
-        range=basic.Range(lo=0, hi=10000, step=1),  # inhibitory cell number never overcomes excitatory ones
-        doc="""Number of inhibitory connexions from external population""",
-        order=21)
+        domain=Range(lo=0, hi=10000, step=1),  # inhibitory cell number never overcomes excitatory ones
+        doc="""Number of inhibitory connexions from external population""")
 
-    T = arrays.FloatArray(
+    T = NArray(
         label=":math:`T`",
         default=numpy.array([20.0]),
-        range=basic.Range(lo=1., hi=20.0, step=0.1),
-        doc="""time scale of describing network activity""",
-        order=22)
+        domain=Range(lo=1., hi=20.0, step=0.1),
+        doc="""time scale of describing network activity""")
 
-    P_e = arrays.IndexArray(
+    P_e = NArray(
         label=":math:`P_e`",  # TODO need to check the size of the array when it's used
         default=numpy.array([-0.04983106,  0.005063550882777035,  -0.023470121807314552,
                              0.0022951513725067503,
                               -0.0004105302652029825,  0.010547051343547399,  -0.03659252821136933,
                               0.007437487505797858,  0.001265064721846073, -0.04072161294490446]),
-        doc="""Polynome of excitatory phenomenological threshold (order 9)""",
-        order=23)
+        doc="""Polynome of excitatory phenomenological threshold (order 9)""")
 
-    P_i = arrays.IndexArray(
+    P_i = NArray(
         label=":math:`P_i`",  # TODO need to check the size of the array when it's used
         default=numpy.array([-0.05149122024209484,  0.004003689190271077, -0.008352013668528155,
                              0.0002414237992765705,
                               -0.0005070645080016026,  0.0014345394104282397, -0.014686689498949967,
                             0.004502706285435741,
                               0.0028472190352532454, -0.015357804594594548]),
-        doc="""Polynome of inhibitory phenomenological threshold (order 9)""",
-        order=24)
+        doc="""Polynome of inhibitory phenomenological threshold (order 9)""")
 
 
-    external_input_ex_ex = arrays.FloatArray(
+    external_input_ex_ex = NArray(
         label=":math:`\nu_e^{drive}`",
         default=numpy.array([0.000]),
-        range=basic.Range(lo=0.00, hi=0.1, step=0.001),
-        doc="""external drive""",
-        order=25)
+        domain=Range(lo=0.00, hi=0.1, step=0.001),
+        doc="""external drive""")
 
-    external_input_ex_in = arrays.FloatArray(
+    external_input_ex_in = NArray(
         label=":math:`\nu_e^{drive}`",
         default=numpy.array([0.000]),
-        range=basic.Range(lo=0.00, hi=0.1, step=0.001),
-        doc="""external drive""",
-        order=26)
+        domain=Range(lo=0.00, hi=0.1, step=0.001),
+        doc="""external drive""")
 
-    external_input_in_ex = arrays.FloatArray(
+    external_input_in_ex = NArray(
         label=":math:`\nu_e^{drive}`",
         default=numpy.array([0.000]),
-        range=basic.Range(lo=0.00, hi=0.1, step=0.001),
-        doc="""external drive""",
-        order=27)
+        domain=Range(lo=0.00, hi=0.1, step=0.001),
+        doc="""external drive""")
 
-    external_input_in_in = arrays.FloatArray(
+    external_input_in_in = NArray(
         label=":math:`\nu_e^{drive}`",
         default=numpy.array([0.000]),
-        range=basic.Range(lo=0.00, hi=0.1, step=0.001),
-        doc="""external drive""",
-        order=28)
+        domain=Range(lo=0.00, hi=0.1, step=0.001),
+        doc="""external drive""")
 
-    tau_OU = arrays.FloatArray(
+    tau_OU = NArray(
         label=":math:`\ntau noise`",
         default=numpy.array([5.0]),
-        range=basic.Range(lo=0.10, hi=10.0, step=0.01),
-        doc="""time constant noise""",
-        order=29)
+        domain=Range(lo=0.10, hi=10.0, step=0.01),
+        doc="""time constant noise""")
 
-    weight_noise =  arrays.FloatArray(
+    weight_noise =  NArray(
         label=":math:`\nweight noise`",
         default=numpy.array([10.5]),
-        range=basic.Range(lo=0., hi=50.0, step=1.0),
-        doc="""weight noise""",
-        order=30)
+        domain=Range(lo=0., hi=50.0, step=1.0),
+        doc="""weight noise""")
 
     # Used for phase-plane axis ranges and to bound random initial() conditions.
-    state_variable_range = basic.Dict(
+    state_variable_range = Final(
         label="State Variable ranges [lo, hi]",
         default={"E": numpy.array([0.0, 0.0]),  # actually the 100Hz should be replaced by 1/T_refrac
                  "I": numpy.array([0.0, 0.0]),
@@ -348,19 +321,24 @@ class Zerlaut_adaptation_first_order(Model):
         I: firing rate of inhibitory population in KHz\n
         W_e: level of adaptation of excitatory in pA\n
         W_i: level of adaptation of inhibitory in pA\n
-        """,
-        order=31)
+        """)
 
-    variables_of_interest = basic.Enumerate(
+    variables_of_interest = List(
+        of=str,
         label="Variables watched by Monitors",
-        options=["E", "I","W_e","W_i","noise"],
-        default=["E"],
-        select_multiple=True,
+        choices=("E", "I","W_e","W_i","noise"),
+        default=("E",),
         doc="""This represents the default state-variables of this Model to be
                monitored. It can be overridden for each Monitor if desired. The
                corresponding state-variable indices for this model are :math:`E = 0`,
-               :math:`I = 1` and :math:`W = 2`.""",
-        order=32)
+               :math:`I = 1` and :math:`W = 2`.""")
+
+    state_variable_boundaries = Final(
+        label="Firing rate of population is always positive",
+        default={"E": numpy.array([0.0, None]),
+                 "I": numpy.array([0.0, None])},
+        doc="""The values for each state-variable should be set to encompass
+            the boundaries of the dynamic range of that state-variable. Set None for one-sided boundaries""")
 
     state_variables = 'E I W_e W_i noise'.split()
     _nvar = 5
@@ -614,7 +592,7 @@ class Zerlaut_adaptation_second_order(Zerlaut_adaptation_first_order):
     _ui_name = "Zerlaut_adaptation_second_order"
 
     #  Used for phase-plane axis ranges and to bound random initial() conditions.
-    state_variable_range = basic.Dict(
+    state_variable_range = Final(
         label="State Variable ranges [lo, hi]",
         default={"E": numpy.array([0.0, 0.0]), # actually the 100Hz should be replaced by 1/T_refrac
                  "I": numpy.array([0.0, 0.0]),
@@ -636,19 +614,17 @@ class Zerlaut_adaptation_second_order(Zerlaut_adaptation_first_order):
         C_ei: the covariance between the excitatory and inhibitory population activities (always symetric) \n
         C_ie: the variance of the inhibitory population activity \n
         W: level of adaptation
-        """,
-        order=31)
+        """)
 
-    variables_of_interest = basic.Enumerate(
+    variables_of_interest = List(
+        of=str,
         label="Variables watched by Monitors",
-        options=["E", "I", "C_ee","C_ei","C_ii","W_e", "W_i","noise"],
-        default=["E"],
-        select_multiple=True,
+        choices=("E", "I", "C_ee","C_ei","C_ii","W_e", "W_i","noise"),
+        default=("E",),
         doc="""This represents the default state-variables of this Model to be
                monitored. It can be overridden for each Monitor if desired. The
                corresponding state-variable indices for this model are :math:`E = 0`,
-               :math:`I = 1`, :math:`C_ee = 2`, :math:`C_ei = 3`, :math:`C_ii = 4` and :math:`W = 5`.""",
-        order=32)
+               :math:`I = 1`, :math:`C_ee = 2`, :math:`C_ei = 3`, :math:`C_ii = 4` and :math:`W = 5`.""")
 
     state_variables = 'E I C_ee C_ei C_ii W_e W_i noise'.split()
     _nvar = 8
@@ -718,31 +694,32 @@ class Zerlaut_adaptation_second_order(Zerlaut_adaptation_first_order):
         _TF_i = self.TF_inhibitory(E, I, E_input_inhibitory, I_input_inhibitory, W_i)
 
         # Derivatives taken numerically : use a central difference formula with spacing `dx`
-        def _diff_fe(TF, fe, fi, fe_ext, fi_ext, W, df=1e-12):
+        df = 1e-7
+        def _diff_fe(TF, fe, fi, fe_ext, fi_ext, W, df=df):
             return (TF(fe+df, fi, fe_ext, fi_ext, W)-TF(fe-df, fi, fe_ext, fi_ext, W))/(2*df*1e3)
 
-        def _diff_fi(TF, fe, fi, fe_ext, fi_ext, W, df=1e-12):
+        def _diff_fi(TF, fe, fi, fe_ext, fi_ext, W, df=df):
             return (TF(fe, fi+df, fe_ext, fi_ext, W)-TF(fe, fi-df, fe_ext, fi_ext, W))/(2*df*1e3)
 
-        def _diff2_fe_fe_e(fe, fi, fe_ext, fi_ext, W, df=1e-12):
+        def _diff2_fe_fe_e(fe, fi, fe_ext, fi_ext, W, df=df):
             TF = self.TF_excitatory
             return (TF(fe+df, fi, fe_ext, fi_ext, W)-2*_TF_e+TF(fe-df, fi, fe_ext, fi_ext, W))/((df*1e3)**2)
 
-        def _diff2_fe_fe_i(fe, fi, fe_ext, fi_ext, W, df=1e-12):
+        def _diff2_fe_fe_i(fe, fi, fe_ext, fi_ext, W, df=df):
             TF = self.TF_inhibitory
             return (TF(fe+df, fi, fe_ext, fi_ext, W)-2*_TF_i+TF(fe-df, fi, fe_ext, fi_ext, W))/((df*1e3)**2)
 
-        def _diff2_fi_fe(TF, fe, fi, fe_ext, fi_ext, W, df=1e-12):
+        def _diff2_fi_fe(TF, fe, fi, fe_ext, fi_ext, W, df=df):
             return (_diff_fi(TF, fe+df, fi, fe_ext, fi_ext, W)-_diff_fi(TF, fe-df, fi, fe_ext, fi_ext, W))/(2*df*1e3)
 
-        def _diff2_fe_fi(TF, fe, fi, fe_ext, fi_ext, W, df=1e-12):
+        def _diff2_fe_fi(TF, fe, fi, fe_ext, fi_ext, W, df=df):
             return (_diff_fe(TF, fe, fi+df, fe_ext, fi_ext, W)-_diff_fe(TF, fe, fi-df, fe_ext, fi_ext, W))/(2*df*1e3)
 
-        def _diff2_fi_fi_e(fe, fi, fe_ext, fi_ext, W, df=1e-12):
+        def _diff2_fi_fi_e(fe, fi, fe_ext, fi_ext, W, df=df):
             TF = self.TF_excitatory
             return (TF(fe, fi+df, fe_ext, fi_ext, W)-2*_TF_e+TF(fe, fi-df, fe_ext, fi_ext, W))/((df*1e3)**2)
 
-        def _diff2_fi_fi_i(fe, fi, fe_ext, fi_ext, W, df=1e-12):
+        def _diff2_fi_fi_i(fe, fi, fe_ext, fi_ext, W, df=df):
             TF = self.TF_inhibitory
             return (TF(fe, fi+df, fe_ext, fi_ext, W)-2*_TF_i+TF(fe, fi-df, fe_ext, fi_ext, W))/((df*1e3)**2)
 

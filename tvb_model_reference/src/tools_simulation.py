@@ -1,6 +1,4 @@
 import tvb.simulator.lab as lab
-from tvb.datatypes.time_series import TimeSeriesRegion
-import tvb.analyzers.fcd_matrix as fcd
 import numpy.random as rgn
 import numpy as np
 import json
@@ -41,45 +39,45 @@ def init(parameter_simulation,parameter_model,parameter_connection_between_regio
     else:
         raise Exception('Bad order for the model')
 
-    model.g_L=parameter_model['g_L']
-    model.E_L_e=parameter_model['E_L_e']
-    model.E_L_i=parameter_model['E_L_i']
-    model.C_m=parameter_model['C_m']
-    model.b_e=parameter_model['b_e']
-    model.a_e=parameter_model['a_e']
-    model.b_i=parameter_model['b_i']
-    model.a_i=parameter_model['a_i']
-    model.tau_w_e=parameter_model['tau_w_e']
-    model.tau_w_i=parameter_model['tau_w_i']
-    model.E_e=parameter_model['E_e']
-    model.E_i=parameter_model['E_i']
-    model.Q_e=parameter_model['Q_e']
-    model.Q_i=parameter_model['Q_i']
-    model.tau_e=parameter_model['tau_e']
-    model.tau_i=parameter_model['tau_i']
-    model.N_tot=parameter_model['N_tot']
-    model.p_connect_e=parameter_model['p_connect_e']
-    model.p_connect_i=parameter_model['p_connect_i']
-    model.g=parameter_model['g']
-    model.T=parameter_model['T']
-    model.P_e=parameter_model['P_e']
-    model.P_i=parameter_model['P_i']
-    model.K_ext_e=parameter_model['K_ext_e']
-    model.K_ext_i=parameter_model['K_ext_i']
-    model.external_input_ex_ex=parameter_model['external_input_ex_ex']
-    model.external_input_ex_in=parameter_model['external_input_ex_in']
-    model.external_input_in_ex=parameter_model['external_input_in_ex']
-    model.external_input_in_in=parameter_model['external_input_in_in']
-    model.tau_OU=parameter_model['tau_OU']
-    model.weight_noise=parameter_model['weight_noise']
-    model.state_variable_range['E'] = parameter_model['initial_condition']['E']
-    model.state_variable_range['I'] = parameter_model['initial_condition']['I']
+    model.g_L=np.array(parameter_model['g_L'])
+    model.E_L_e=np.array(parameter_model['E_L_e'])
+    model.E_L_i=np.array(parameter_model['E_L_i'])
+    model.C_m=np.array(parameter_model['C_m'])
+    model.b_e=np.array(parameter_model['b_e'])
+    model.a_e=np.array(parameter_model['a_e'])
+    model.b_i=np.array(parameter_model['b_i'])
+    model.a_i=np.array(parameter_model['a_i'])
+    model.tau_w_e=np.array(parameter_model['tau_w_e'])
+    model.tau_w_i=np.array(parameter_model['tau_w_i'])
+    model.E_e=np.array(parameter_model['E_e'])
+    model.E_i=np.array(parameter_model['E_i'])
+    model.Q_e=np.array(parameter_model['Q_e'])
+    model.Q_i=np.array(parameter_model['Q_i'])
+    model.tau_e=np.array(parameter_model['tau_e'])
+    model.tau_i=np.array(parameter_model['tau_i'])
+    model.N_tot=np.array(parameter_model['N_tot'])
+    model.p_connect_e=np.array(parameter_model['p_connect_e'])
+    model.p_connect_i=np.array(parameter_model['p_connect_i'])
+    model.g=np.array(parameter_model['g'])
+    model.T=np.array(parameter_model['T'])
+    model.P_e=np.array(parameter_model['P_e'])
+    model.P_i=np.array(parameter_model['P_i'])
+    model.K_ext_e=np.array(parameter_model['K_ext_e'])
+    model.K_ext_i=np.array(parameter_model['K_ext_i'])
+    model.external_input_ex_ex=np.array(parameter_model['external_input_ex_ex'])
+    model.external_input_ex_in=np.array(parameter_model['external_input_ex_in'])
+    model.external_input_in_ex=np.array(parameter_model['external_input_in_ex'])
+    model.external_input_in_in=np.array(parameter_model['external_input_in_in'])
+    model.tau_OU=np.array(parameter_model['tau_OU'])
+    model.weight_noise=np.array(parameter_model['weight_noise'])
+    model.state_variable_range['E'] =np.array( parameter_model['initial_condition']['E'])
+    model.state_variable_range['I'] =np.array( parameter_model['initial_condition']['I'])
     if parameter_model['order'] == 2:
-        model.state_variable_range['C_ee'] = parameter_model['initial_condition']['C_ee']
-        model.state_variable_range['C_ei'] = parameter_model['initial_condition']['C_ei']
-        model.state_variable_range['C_ii'] = parameter_model['initial_condition']['C_ii']
-    model.state_variable_range['W_e'] = parameter_model['initial_condition']['W_e']
-    model.state_variable_range['W_i'] = parameter_model['initial_condition']['W_i']
+        model.state_variable_range['C_ee'] = np.array(parameter_model['initial_condition']['C_ee'])
+        model.state_variable_range['C_ei'] = np.array(parameter_model['initial_condition']['C_ei'])
+        model.state_variable_range['C_ii'] = np.array(parameter_model['initial_condition']['C_ii'])
+    model.state_variable_range['W_e'] = np.array(parameter_model['initial_condition']['W_e'])
+    model.state_variable_range['W_i'] = np.array(parameter_model['initial_condition']['W_i'])
 
     ## Connection
     if parameter_connection_between_region['default']:
@@ -94,13 +92,17 @@ def init(parameter_simulation,parameter_model,parameter_connection_between_regio
     elif parameter_connection_between_region['from_h5']:
        connection = lab.connectivity.Connectivity().from_file(parameter_connection_between_region['path'])
     else:
-        connection = lab.connectivity.Connectivity(number_of_regions=parameter_connection_between_region['number_of_regions'],
-                                               tract_lengths=parameter_connection_between_region['tract_lengths'],
-                                               weights=parameter_connection_between_region['weights'],)
+        connection = lab.connectivity.Connectivity(
+                                                number_of_regions=parameter_connection_between_region['number_of_regions'],
+                                               tract_lengths=np.array(parameter_connection_between_region['tract_lengths']),
+                                               weights=np.array(parameter_connection_between_region['weights']),
+            region_labels=np.arange(0, parameter_connection_between_region['number_of_regions'], 1, dtype='U128'),#TODO need to replace by parameter
+            centres=np.arange(0, parameter_connection_between_region['number_of_regions'], 1),#TODO need to replace by parameter
+        )
 
     if 'normalised'in parameter_connection_between_region.keys() and parameter_connection_between_region['normalised']:
         connection.weights = connection.weights/np.sum(connection.weights,axis=0)
-    connection.speed = parameter_connection_between_region['speed']
+    connection.speed = np.array(parameter_connection_between_region['speed'])
 
 
 
@@ -109,72 +111,64 @@ def init(parameter_simulation,parameter_model,parameter_connection_between_regio
         stimulation = None
     else:
         eqn_t = lab.equations.PulseTrain()
-        eqn_t.parameters["onset"] = parameter_stimulation["onset"] # ms
-        eqn_t.parameters["tau"]   = parameter_stimulation["tau"] # ms
-        eqn_t.parameters["T"]     = parameter_stimulation["T"] # ms; # 0.02kHz repetition frequency
+        eqn_t.parameters["onset"] = np.array(parameter_stimulation["onset"]) # ms
+        eqn_t.parameters["tau"]   = np.array(parameter_stimulation["tau"]) # ms
+        eqn_t.parameters["T"]     = np.array(parameter_stimulation["T"]) # ms; # 0.02kHz repetition frequency
         stimulation = lab.patterns.StimuliRegion(temporal=eqn_t,
                                           connectivity=connection,
                                           weight=parameter_stimulation['weights'])
     ## end add
 
-
-
-
-
-
-
-
-
     ## Coupling
     if parameter_coupling['type'] == 'Linear':
-        coupling = lab.coupling.Linear(a=parameter_coupling['parameter']['a'],
-                                       b=parameter_coupling['parameter']['b'])
+        coupling = lab.coupling.Linear(a=np.array(parameter_coupling['parameter']['a']),
+                                       b=np.array(parameter_coupling['parameter']['b']))
     elif parameter_coupling['type'] == 'Scaling':
-        coupling = lab.coupling.Scaling(a=parameter_coupling['parameter']['a'])
+        coupling = lab.coupling.Scaling(a=np.array(parameter_coupling['parameter']['a']))
     elif parameter_coupling['type'] == 'HyperbolicTangent':
-        coupling = lab.coupling.HyperbolicTangent(a=parameter_coupling['parameter']['a'],
-                                       b=parameter_coupling['parameter']['b'],
-                                       midpoint=parameter_coupling['parameter']['midpoint'],
-                                       sigma= parameter_coupling['parameter']['sigma'],)
+        coupling = lab.coupling.HyperbolicTangent(a=np.array(parameter_coupling['parameter']['a']),
+                                       b=np.array(parameter_coupling['parameter']['b']),
+                                       midpoint=np.array(parameter_coupling['parameter']['midpoint']),
+                                       sigma= np.array(parameter_coupling['parameter']['sigma']),)
     elif parameter_coupling['type'] == 'Sigmoidal':
-        coupling = lab.coupling.Sigmoidal(a=parameter_coupling['parameter']['a'],                                       b=parameter_coupling['b'],
-                                       midpoint=parameter_coupling['parameter']['midpoint'],
-                                       sigma= parameter_coupling['parameter']['sigma'],
-                                       cmin=parameter_coupling['parameter']['cmin'],
-                                       cmax=parameter_coupling['parameter']['cmax'])
+        coupling = lab.coupling.Sigmoidal(a=np.array(parameter_coupling['parameter']['a']),                                       b=parameter_coupling['b'],
+                                       midpoint=np.array(parameter_coupling['parameter']['midpoint']),
+                                       sigma= np.array(parameter_coupling['parameter']['sigma']),
+                                       cmin=np.array(parameter_coupling['parameter']['cmin']),
+                                       cmax=np.array(parameter_coupling['parameter']['cmax']))
     elif parameter_coupling['type'] == 'SigmoidalJansenRit':
-        coupling = lab.coupling.SigmoidalJansenRit(a=parameter_coupling['parameter']['a'],                                       b=parameter_coupling['b'],
-                                       midpoint=parameter_coupling['parameter']['midpoint'],
-                                       r= parameter_coupling['parameter']['r'],
-                                       cmin=parameter_coupling['parameter']['cmin'],
-                                       cmax=parameter_coupling['parameter']['cmax'])
+        coupling = lab.coupling.SigmoidalJansenRit(a=np.array(parameter_coupling['parameter']['a']),                                       b=parameter_coupling['b'],
+                                       midpoint=np.array(parameter_coupling['parameter']['midpoint']),
+                                       r= np.array(parameter_coupling['parameter']['r']),
+                                       cmin=np.array(parameter_coupling['parameter']['cmin']),
+                                       cmax=np.array(parameter_coupling['parameter']['cmax']))
     elif parameter_coupling['type'] == 'PreSigmoidal':
-        coupling = lab.coupling.PreSigmoidal(H=parameter_coupling['parameter']['H'],                                       b=parameter_coupling['b'],
-                                       Q=parameter_coupling['parameter']['Q'],
-                                       G= parameter_coupling['parameter']['G'],
-                                       P=parameter_coupling['parameter']['P'],
-                                       theta=parameter_coupling['parameter']['theta'],
-                                       dynamic=parameter_coupling['parameter']['dynamic'],
-                                       globalT=parameter_coupling['parameter']['globalT'],
+        coupling = lab.coupling.PreSigmoidal(H=np.array(parameter_coupling['parameter']['H']),                                       b=parameter_coupling['b'],
+                                       Q=np.array(parameter_coupling['parameter']['Q']),
+                                       G= np.array(parameter_coupling['parameter']['G']),
+                                       P=np.array(parameter_coupling['parameter']['P']),
+                                       theta=np.array(parameter_coupling['parameter']['theta']),
+                                       dynamic=np.array(parameter_coupling['parameter']['dynamic']),
+                                       globalT=np.array(parameter_coupling['parameter']['globalT']),
                                              )
     elif parameter_coupling['type'] == 'Difference':
-        coupling = lab.coupling.Difference(a=parameter_coupling['parameter']['a'])
+        coupling = lab.coupling.Difference(a=np.array(parameter_coupling['parameter']['a']))
     elif parameter_coupling['type'] == 'Kuramoto':
-        coupling = lab.coupling.Kuramoto(a=parameter_coupling['parameter']['a'])
+        coupling = lab.coupling.Kuramoto(a=np.array(parameter_coupling['parameter']['a']))
     else:
         raise Exception('Bad type for the coupling')
 
     ## Integrator
     if not parameter_integrator['stochastic']:
         if parameter_integrator['type'] == 'Heun':
-            integrator = lab.integrators.HeunDeterministic(dt=parameter_integrator['dt'])
+            integrator = lab.integrators.HeunDeterministic(dt=np.array(parameter_integrator['dt']))
         elif parameter_integrator['type'] == 'Euler':
-             integrator = lab.integrators.EulerDeterministic(dt=parameter_integrator['dt'])
+             integrator = lab.integrators.EulerDeterministic(dt=np.array(parameter_integrator['dt']))
         else:
             raise Exception('Bad type for the integrator')
     else:
         if parameter_integrator['noise_type'] == 'Additive':
-            noise = lab.noise.Additive(nsig=parameter_integrator['noise_parameter']['nsig'],
+            noise = lab.noise.Additive(nsig=np.array(parameter_integrator['noise_parameter']['nsig']),
                                         ntau=parameter_integrator['noise_parameter']['ntau'],)
         else:
             raise Exception('Bad type for the noise')
@@ -237,12 +231,6 @@ def init(parameter_simulation,parameter_model,parameter_connection_between_regio
         np.save(parameter_simulation['path_result']+'/step_init.npy',simulator.history.buffer)
         # end edit
     return simulator
-
-
-
-
-
-
 
 def run_simulation(simulator, time, parameter_simulation,parameter_monitor):
     '''
@@ -376,7 +364,7 @@ def print_EI_one(path,time_begin,time_end,position_monitor,position_node):
     plt.plot(output[position_monitor][0]*1e-3, # time in second
              output[position_monitor][1][:,1,position_node]*1e3,
              color='r')
-    plt.figure()
+    # plt.figure()
     # plt.plot(output[position_monitor][0]*1e-3, # time in second
     #          output[position_monitor][1][:,5,position_node],
     #          color='k')
@@ -419,41 +407,45 @@ def print_bistability(parameter_model,show=True):
     else:
         raise Exception('Bad order for the model')
 
-    model.g_L=parameter_model['g_L']
-    model.E_L_e=parameter_model['E_L_e']
-    model.E_L_i=parameter_model['E_L_i']
-    model.C_m=parameter_model['C_m']
-    model.b_e=parameter_model['b_e']
-    model.a_e=parameter_model['a_e']
-    model.b_i=parameter_model['b_i']
-    model.a_i=parameter_model['a_i']
-    model.tau_w_e=parameter_model['tau_w_e']
-    model.tau_w_i=parameter_model['tau_w_i']
-    model.E_e=parameter_model['E_e']
-    model.E_i=parameter_model['E_i']
-    model.Q_e=parameter_model['Q_e']
-    model.Q_i=parameter_model['Q_i']
-    model.tau_e=parameter_model['tau_e']
-    model.tau_i=parameter_model['tau_i']
-    model.N_tot=parameter_model['N_tot']
-    model.p_connect_e=parameter_model['p_connect_e']
-    model.p_connect_i=parameter_model['p_connect_i']
-    model.g=parameter_model['g']
-    model.T=parameter_model['T']
-    model.P_e=parameter_model['P_e']
-    model.P_i=parameter_model['P_i']
-    model.external_input_ex_ex=parameter_model['external_input_ex_ex']
-    model.external_input_ex_in=parameter_model['external_input_ex_in']
-    model.external_input_in_ex=parameter_model['external_input_in_ex']
-    model.external_input_in_in=parameter_model['external_input_in_in']
-    model.state_variable_range['E'] = parameter_model['initial_condition']['E']
-    model.state_variable_range['I'] = parameter_model['initial_condition']['I']
+    model.g_L=np.array(parameter_model['g_L'])
+    model.E_L_e=np.array(parameter_model['E_L_e'])
+    model.E_L_i=np.array(parameter_model['E_L_i'])
+    model.C_m=np.array(parameter_model['C_m'])
+    model.b_e=np.array(parameter_model['b_e'])
+    model.a_e=np.array(parameter_model['a_e'])
+    model.b_i=np.array(parameter_model['b_i'])
+    model.a_i=np.array(parameter_model['a_i'])
+    model.tau_w_e=np.array(parameter_model['tau_w_e'])
+    model.tau_w_i=np.array(parameter_model['tau_w_i'])
+    model.E_e=np.array(parameter_model['E_e'])
+    model.E_i=np.array(parameter_model['E_i'])
+    model.Q_e=np.array(parameter_model['Q_e'])
+    model.Q_i=np.array(parameter_model['Q_i'])
+    model.tau_e=np.array(parameter_model['tau_e'])
+    model.tau_i=np.array(parameter_model['tau_i'])
+    model.N_tot=np.array(parameter_model['N_tot'])
+    model.p_connect_e=np.array(parameter_model['p_connect_e'])
+    model.p_connect_i=np.array(parameter_model['p_connect_i'])
+    model.g=np.array(parameter_model['g'])
+    model.T=np.array(parameter_model['T'])
+    model.P_e=np.array(parameter_model['P_e'])
+    model.P_i=np.array(parameter_model['P_i'])
+    model.K_ext_e=np.array(parameter_model['K_ext_e'])
+    model.K_ext_i=np.array(parameter_model['K_ext_i'])
+    model.external_input_ex_ex=np.array(parameter_model['external_input_ex_ex'])
+    model.external_input_ex_in=np.array(parameter_model['external_input_ex_in'])
+    model.external_input_in_ex=np.array(parameter_model['external_input_in_ex'])
+    model.external_input_in_in=np.array(parameter_model['external_input_in_in'])
+    model.tau_OU=np.array(parameter_model['tau_OU'])
+    model.weight_noise=np.array(parameter_model['weight_noise'])
+    model.state_variable_range['E'] =np.array( parameter_model['initial_condition']['E'])
+    model.state_variable_range['I'] =np.array( parameter_model['initial_condition']['I'])
     if parameter_model['order'] == 2:
-        model.state_variable_range['C_ee'] = parameter_model['initial_condition']['C_ee']
-        model.state_variable_range['C_ei'] = parameter_model['initial_condition']['C_ei']
-        model.state_variable_range['C_ii'] = parameter_model['initial_condition']['C_ii']
-    model.state_variable_range['W_e'] = parameter_model['initial_condition']['W_e']
-    model.state_variable_range['W_i'] = parameter_model['initial_condition']['W_i']
+        model.state_variable_range['C_ee'] = np.array(parameter_model['initial_condition']['C_ee'])
+        model.state_variable_range['C_ei'] = np.array(parameter_model['initial_condition']['C_ei'])
+        model.state_variable_range['C_ii'] = np.array(parameter_model['initial_condition']['C_ii'])
+    model.state_variable_range['W_e'] = np.array(parameter_model['initial_condition']['W_e'])
+    model.state_variable_range['W_i'] = np.array(parameter_model['initial_condition']['W_i'])
 
     ##Solution equation
     def equation(x):
@@ -635,24 +627,24 @@ def print_all(path, time_begin, time_end, position_monitor,con,size=0.031, shift
     plt.show()
 
 
-def compute_fc(con, bold_data, parameter_monitor):
-    import tvb.analyzers.correlation_coefficient as corr_coeff
-    from tvb.datatypes.time_series import TimeSeriesRegion
-
-    bold_period = parameter_monitor['parameter_Bold']['period']
-    # Remove transient
-    bold_data = bold_data[10:, :, :]
-
-    tsr = TimeSeriesRegion(connectivity=con,
-                            data=bold_data,
-                            sample_period=bold_period)
-    tsr.configure()
-    # Compute FC
-    corrcoeff_analyser = corr_coeff.CorrelationCoefficient(time_series=tsr)
-    corrcoeff_data = corrcoeff_analyser.evaluate()
-    corrcoeff_data.configure()
-    FC = corrcoeff_data.array_data[..., 0, 0]
-    return FC
+# def compute_fc(con, bold_data, parameter_monitor):
+#     import tvb.analyzers.correlation_coefficient as corr_coeff
+#     from tvb.datatypes.time_series import TimeSeriesRegion
+#
+#     bold_period = parameter_monitor['parameter_Bold']['period']
+#     # Remove transient
+#     bold_data = bold_data[10:, :, :]
+#
+#     tsr = TimeSeriesRegion(connectivity=con,
+#                             data=bold_data,
+#                             sample_period=bold_period)
+#     tsr.configure()
+#     # Compute FC
+#     corrcoeff_analyser = corr_coeff.CorrelationCoefficient(time_series=tsr)
+#     corrcoeff_data = corrcoeff_analyser.evaluate()
+#     corrcoeff_data.configure()
+#     FC = corrcoeff_data.array_data[..., 0, 0]
+#     return FC
 
 def plot_fc_matrix(FC, plot_name=None, plot_region_names=False, con=None):
     import matplotlib.pyplot as plt
@@ -675,22 +667,22 @@ def plot_fc_matrix(FC, plot_name=None, plot_region_names=False, con=None):
     plt.title(title, fontsize=20)
     plt.show()
 
-def compute_fcd(con, bold_data,parameter_monitor,wind_len=180e3,wind_sp=4e3):
-    bold_period = parameter_monitor['parameter_Bold']['period']
-
-    # Build the time series object
-    tsr = TimeSeriesRegion(connectivity=con,
-                            data=bold_data,
-                            sample_period=bold_period)
-    tsr.configure()
-
-    # Create and evaluate the analysis
-
-    fcd_analyser = fcd.FcdCalculator(time_series=tsr, sw=wind_len, sp=wind_sp)
-    fcd_data = fcd_analyser.evaluate()
-    # Store the results
-    FCD=fcd_data[0][:,:,0,0]
-    return FCD
+# def compute_fcd(con, bold_data,parameter_monitor,wind_len=180e3,wind_sp=4e3):
+#     bold_period = parameter_monitor['parameter_Bold']['period']
+#
+#     # Build the time series object
+#     tsr = TimeSeriesRegion(connectivity=con,
+#                             data=bold_data,
+#                             sample_period=bold_period)
+#     tsr.configure()
+#
+#     # Create and evaluate the analysis
+#
+#     fcd_analyser = fcd.FcdCalculator(time_series=tsr, sw=wind_len, sp=wind_sp)
+#     fcd_data = fcd_analyser.evaluate()
+#     # Store the results
+#     FCD=fcd_data[0][:,:,0,0]
+#     return FCD
 
 def plot_fcd_matrix(fcd, plot_name=None):
     import matplotlib.pyplot as plt
