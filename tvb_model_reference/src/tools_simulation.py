@@ -377,10 +377,10 @@ def print_EI_one(path,time_begin,time_end,position_monitor,position_node):
              output[position_monitor][1][:,1,position_node]*1e3,
              color='r')
     plt.figure()
-    plt.plot(output[position_monitor][0]*1e-3, # time in second
-             output[position_monitor][1][:,5,position_node],
-             color='k')
-    plt.show()
+    # plt.plot(output[position_monitor][0]*1e-3, # time in second
+    #          output[position_monitor][1][:,5,position_node],
+    #          color='k')
+    # plt.show()
 
 def print_region(path,time_begin,time_end,position_monitor,position_variable,nb_region):
     '''
@@ -475,7 +475,7 @@ def print_bistability(parameter_model,show=True):
     import matplotlib.pyplot as plt
     plt.figure()
     plt.plot(xrange1*1e3,feprimovec*1e3,'k-',xrange1*1e3,xrange1*1e3,'k--')
-    # plt.plot(fiprimovec,feprimovec,'r-')
+    plt.plot(fiprimovec*1e3,feprimovec*1e3,'r-')
     if show:
         plt.show()
     return xrange1,feprimovec

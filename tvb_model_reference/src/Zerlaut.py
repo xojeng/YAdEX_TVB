@@ -389,6 +389,8 @@ class Zerlaut_adaptation_first_order(Model):
 
         # external firing rate
         Fe_ext = c_0 + lc_E + self.weight_noise * noise
+        index_bad_input = numpy.where( Fe_ext*self.K_ext_e  < 0)
+        Fe_ext[index_bad_input] = 0.0
         Fi_ext = lc_I
 
         # Excitatory firing rate derivation
@@ -398,7 +400,7 @@ class Zerlaut_adaptation_first_order(Model):
             W_e)-E)/self.T
         # Inhibitory firing rate derivation
         derivative[1] = (self.TF_inhibitory(
-            E, I, Fe_ext+self.external_input_in_ex,
+            E, I, Fe_ext + self.external_input_in_ex,
             Fi_ext+self.external_input_in_in,
             W_i)-I)/self.T
         # Adaptation excitatory
@@ -407,16 +409,16 @@ class Zerlaut_adaptation_first_order(Model):
                 Fi_ext+self.external_input_ex_in,
                 W_e, self.Q_e, self.tau_e, self.E_e,
                 self.Q_i, self.tau_i, self.E_i,
-                self.g_L, self.C_m, self.E_L_e, self.N_tot,
-                self.p_connect_e, self.g,self.K_ext_e,self.K_ext_i)
+                self.g_L, self.C_m, self.E_L_e, self.N_tot,self.p_connect_e,
+                self.p_connect_i, self.g,self.K_ext_e,self.K_ext_i)
         derivative[2] = -W_e/self.tau_w_e+self.b_e*E+self.a_e*(mu_V-self.E_L_e)/self.tau_w_e
         # Adaptation inhibitory
         mu_V, sigma_V, T_V = self.get_fluct_regime_vars(
-                E, I, Fe_ext+self.external_input_in_ex,
+                E, I, Fe_ext + self.external_input_in_ex,
                 Fi_ext+self.external_input_in_in,
                 W_i, self.Q_e, self.tau_e, self.E_e,
                 self.Q_i, self.tau_i, self.E_i,
-                self.g_L, self.C_m, self.E_L_i, self.N_tot,
+                self.g_L, self.C_m, self.E_L_i, self.N_tot,self.p_connect_e,
                 self.p_connect_i, self.g,self.K_ext_e,self.K_ext_i)
         derivative[3] = -W_i/self.tau_w_i+self.b_i*I+self.a_i*(mu_V-self.E_L_i)/self.tau_w_i
         derivative[4] = -noise/self.tau_OU
@@ -703,9 +705,11 @@ class Zerlaut_adaptation_second_order(Zerlaut_adaptation_first_order):
 
         # external firing rate for the different population
         E_input_excitatory = c_0+lc_E+self.external_input_ex_ex + self.weight_noise * noise
-        index_bad_input = numpy.where( E_input_excitatory*self.K_ext_e + E*(1.-self.g)*self.p_connect_e*self.N_tot < 0)
-        E_input_excitatory[index_bad_input] = -E[index_bad_input]*(1.-self.g)*self.p_connect_e*self.N_tot/self.K_ext_e
-        E_input_inhibitory = c_0+lc_E+self.external_input_in_ex
+        index_bad_input = numpy.where( E_input_excitatory < 0)
+        E_input_excitatory[index_bad_input] = 0.0
+        E_input_inhibitory = c_0+lc_E+self.external_input_in_ex + self.weight_noise * noise
+        index_bad_input = numpy.where( E_input_inhibitory < 0)
+        E_input_inhibitory[index_bad_input] = 0.0
         I_input_excitatory = lc_I+self.external_input_ex_in
         I_input_inhibitory = lc_I+self.external_input_in_in
 
@@ -714,31 +718,31 @@ class Zerlaut_adaptation_second_order(Zerlaut_adaptation_first_order):
         _TF_i = self.TF_inhibitory(E, I, E_input_inhibitory, I_input_inhibitory, W_i)
 
         # Derivatives taken numerically : use a central difference formula with spacing `dx`
-        def _diff_fe(TF, fe, fi, fe_ext, fi_ext, W, df=1e-7):
+        def _diff_fe(TF, fe, fi, fe_ext, fi_ext, W, df=1e-12):
             return (TF(fe+df, fi, fe_ext, fi_ext, W)-TF(fe-df, fi, fe_ext, fi_ext, W))/(2*df*1e3)
 
-        def _diff_fi(TF, fe, fi, fe_ext, fi_ext, W, df=1e-7):
+        def _diff_fi(TF, fe, fi, fe_ext, fi_ext, W, df=1e-12):
             return (TF(fe, fi+df, fe_ext, fi_ext, W)-TF(fe, fi-df, fe_ext, fi_ext, W))/(2*df*1e3)
 
-        def _diff2_fe_fe_e(fe, fi, fe_ext, fi_ext, W, df=1e-7):
+        def _diff2_fe_fe_e(fe, fi, fe_ext, fi_ext, W, df=1e-12):
             TF = self.TF_excitatory
             return (TF(fe+df, fi, fe_ext, fi_ext, W)-2*_TF_e+TF(fe-df, fi, fe_ext, fi_ext, W))/((df*1e3)**2)
 
-        def _diff2_fe_fe_i(fe, fi, fe_ext, fi_ext, W, df=1e-7):
+        def _diff2_fe_fe_i(fe, fi, fe_ext, fi_ext, W, df=1e-12):
             TF = self.TF_inhibitory
             return (TF(fe+df, fi, fe_ext, fi_ext, W)-2*_TF_i+TF(fe-df, fi, fe_ext, fi_ext, W))/((df*1e3)**2)
 
-        def _diff2_fi_fe(TF, fe, fi, fe_ext, fi_ext, W, df=1e-7):
+        def _diff2_fi_fe(TF, fe, fi, fe_ext, fi_ext, W, df=1e-12):
             return (_diff_fi(TF, fe+df, fi, fe_ext, fi_ext, W)-_diff_fi(TF, fe-df, fi, fe_ext, fi_ext, W))/(2*df*1e3)
 
-        def _diff2_fe_fi(TF, fe, fi, fe_ext, fi_ext, W, df=1e-7):
+        def _diff2_fe_fi(TF, fe, fi, fe_ext, fi_ext, W, df=1e-12):
             return (_diff_fe(TF, fe, fi+df, fe_ext, fi_ext, W)-_diff_fe(TF, fe, fi-df, fe_ext, fi_ext, W))/(2*df*1e3)
 
-        def _diff2_fi_fi_e(fe, fi, fe_ext, fi_ext, W, df=1e-7):
+        def _diff2_fi_fi_e(fe, fi, fe_ext, fi_ext, W, df=1e-12):
             TF = self.TF_excitatory
             return (TF(fe, fi+df, fe_ext, fi_ext, W)-2*_TF_e+TF(fe, fi-df, fe_ext, fi_ext, W))/((df*1e3)**2)
 
-        def _diff2_fi_fi_i(fe, fi, fe_ext, fi_ext, W, df=1e-7):
+        def _diff2_fi_fi_i(fe, fi, fe_ext, fi_ext, W, df=1e-12):
             TF = self.TF_inhibitory
             return (TF(fe, fi+df, fe_ext, fi_ext, W)-2*_TF_i+TF(fe, fi-df, fe_ext, fi_ext, W))/((df*1e3)**2)
 
@@ -791,7 +795,7 @@ class Zerlaut_adaptation_second_order(Zerlaut_adaptation_first_order):
         mu_V, sigma_V, T_V = self.get_fluct_regime_vars(
                 E, I,
                 E_input_excitatory,
-                E_input_inhibitory,
+                I_input_excitatory,
                 W_e, self.Q_e, self.tau_e, self.E_e,
                 self.Q_i, self.tau_i, self.E_i,
                 self.g_L, self.C_m, self.E_L_e, self.N_tot,
@@ -801,7 +805,7 @@ class Zerlaut_adaptation_second_order(Zerlaut_adaptation_first_order):
         # Adaptation inhibitory
         mu_V, sigma_V, T_V = self.get_fluct_regime_vars(
                 E, I,
-                I_input_excitatory,
+                E_input_inhibitory,
                 I_input_inhibitory,
                 W_i, self.Q_e, self.tau_e, self.E_e,
                 self.Q_i, self.tau_i, self.E_i,
