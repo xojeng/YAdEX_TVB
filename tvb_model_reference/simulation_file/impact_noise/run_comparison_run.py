@@ -1,12 +1,15 @@
-from tvb_model_reference.simulation_file.impact_noise.parameter_TVB import Parameter
 # from tvb_model_reference.simulation_file.impact_noise.parameter_Matteo_original import Parameter
+# from tvb_model_reference.simulation_file.impact_noise.parameter_TVB import Parameter
+# from tvb_model_reference.simulation_file.impact_noise.parameter_TVB_bistable import Parameter
+from tvb_model_reference.simulation_file.impact_noise.parameter_TVB_bistable_test_noise import Parameter
 import tvb_model_reference.src.tools_simulation as tools
 import matplotlib.pyplot as plt
 import copy
 
 parameters = Parameter()
 # tools.print_bistability(parameters.parameter_model,show=False)
-run_sim = 15000.0
+parameters.parameter_simulation['path_result'] = './result/test_jupyter/'
+run_sim = 14999.0
 simulator = tools.init(parameters.parameter_simulation,
                               parameters.parameter_model,
                               parameters.parameter_connection_between_region,

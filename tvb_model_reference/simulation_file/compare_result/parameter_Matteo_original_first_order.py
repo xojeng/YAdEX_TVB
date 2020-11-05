@@ -9,7 +9,7 @@ class Parameter :
         self.parameter_model ={
             'matteo':True,
             #order of the model
-            'order':2,
+            'order':1,
             #parameter of the model
             'g_L':10.0,
             'E_L_e':-65.0,
@@ -44,7 +44,7 @@ class Parameter :
             'K_ext_i':0,
             #Initial condition :
             'initial_condition':{
-                "E": [0.0008, 0.0008],"I": [0.0004, 0.0004],"C_ee": [0.0,0.0],"C_ei": [0.0,0.0],"C_ii": [0.0,0.0],"W_e": [0.0, 0.0],"W_i": [0.0,0.0],"noise":[0.0,0.0]}
+                "E": [0.0009, 0.0009],"I": [0.0004, 0.0004],"W_e": [0.0, 0.0],"W_i": [0.0,0.0],"noise":[0.0,0.0]}
         }
 
         self. parameter_connection_between_region={
@@ -79,7 +79,7 @@ class Parameter :
             'stochastic':True,
             'noise_type': 'Additive', # choice : Additive
             'noise_parameter':{
-                'nsig':[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                'nsig':[0.0, 0.0, 0.0, 0.0, 0.0],
                 'ntau':0.0,
                 'dt': 0.1
                                 },
@@ -90,7 +90,7 @@ class Parameter :
             'Raw':True,
             'TemporalAverage':False,
             'parameter_TemporalAverage':{
-                'variables_of_interest':[0,1,2,3,4,5,6,7],
+                'variables_of_interest':[0,1,2,3,4],
                 'period':self.parameter_integrator['dt']*10.0
             },
             'Bold':False,

@@ -1,21 +1,21 @@
 class Parameter :
     def __init__(self):
         self.parameter_simulation={
-            'path_result':'./result/M_original',
+            'path_result':'./result/test_noise/',
             'seed':10, # the seed for the random generator
             'save_time': 1000.0, # the time of simulation in each file
         }
 
         self.parameter_model ={
-            'matteo':True,
+            'matteo':False,
             #order of the model
             'order':2,
             #parameter of the model
             'g_L':10.0,
-            'E_L_e':-65.0,
+            'E_L_e':-63.0,
             'E_L_i':-65.0,
             'C_m':200.0,
-            'b_e':0.0,
+            'b_e':1.0,
             'a_e':0.0,
             'b_i':0.0,
             'a_i':0.0,
@@ -34,17 +34,17 @@ class Parameter :
             'T':20.0,
             'P_e':[-0.0498, 0.00506, -0.025, 0.0014, -0.00041, 0.0105, -0.036, 0.0074, 0.0012, -0.0407],
             'P_i':[-0.0514, 0.004, -0.0083, 0.0002, -0.0005, 0.0014, -0.0146, 0.0045, 0.0028, -0.0153],
-            'external_input_ex_ex':0.000,
+            'external_input_ex_ex':0.315*1e-3,
             'external_input_ex_in':0.000,
-            'external_input_in_ex':0.000,
+            'external_input_in_ex':0.315*1e-3,
             'external_input_in_in':0.000,
-            'tau_OU':1.0,
-            'weight_noise':0.0,
+            'tau_OU':10.0,
+            'weight_noise':5*1e-5,
             'K_ext_e':400,
             'K_ext_i':0,
             #Initial condition :
             'initial_condition':{
-                "E": [0.0008, 0.0008],"I": [0.0004, 0.0004],"C_ee": [0.0,0.0],"C_ei": [0.0,0.0],"C_ii": [0.0,0.0],"W_e": [0.0, 0.0],"W_i": [0.0,0.0],"noise":[0.0,0.0]}
+                "E": [0.000, 0.000],"I": [0.00, 0.00],"C_ee": [0.0,0.0],"C_ei": [0.0,0.0],"C_ii": [0.0,0.0],"W_e": [0.0, 0.0],"W_i": [0.0,0.0],"noise":[0.0,0.0]}
         }
 
         self. parameter_connection_between_region={
@@ -54,7 +54,7 @@ class Parameter :
             #from file (repertory with following files : tract_lengths.npy and weights.npy)
             'from_file':False,
             'from_h5':False,
-            'path':'../data/hcp-001.zip', #repertory of the files
+            'path':'', #repertory of the files
             # File description
             'number_of_regions':2, # number of region
             # lenghts of tract between region : dimension => (number_of_regions, number_of_regions)
@@ -79,7 +79,7 @@ class Parameter :
             'stochastic':True,
             'noise_type': 'Additive', # choice : Additive
             'noise_parameter':{
-                'nsig':[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                'nsig':[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0],
                 'ntau':0.0,
                 'dt': 0.1
                                 },
