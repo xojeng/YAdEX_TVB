@@ -5,6 +5,7 @@ import copy
 
 
 M_original = Parameter()
+M_original.parameter_simulation['path_result']="./result/M_original"
 M_mono = copy.deepcopy(M_original)
 M_mono.parameter_model['E_L_e']=-67
 M_mono.parameter_simulation['path_result']="./result/M_mono"
@@ -32,5 +33,7 @@ for parameters in [M_original,M_bi,M_mono,TVB_original,TVB_bi,TVB_mono]:
                                 run_sim,
                                 parameters.parameter_simulation,
                                 parameters.parameter_monitor)
+    plt.title(parameters.parameter_simulation['path_result'])
     tools.print_EI_one(parameters.parameter_simulation['path_result'],
                            0.0,run_sim,0,0)
+plt.show()
