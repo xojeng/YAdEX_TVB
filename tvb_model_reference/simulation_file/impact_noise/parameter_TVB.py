@@ -36,10 +36,10 @@ class Parameter :
             'P_i':[-0.0514, 0.004, -0.0083, 0.0002, -0.0005, 0.0014, -0.0146, 0.0045, 0.0028, -0.0153],
             'external_input_ex_ex':0.315*1e-3,
             'external_input_ex_in':0.000,
-            'external_input_in_ex':0.000,
+            'external_input_in_ex':0.315*1e-3,
             'external_input_in_in':0.000,
             'tau_OU':5.0,
-            'weight_noise':10.5*1e-6,
+            'weight_noise':10.5*1e-5,
             'K_ext_e':400,
             'K_ext_i':0,
             #Initial condition :
@@ -81,9 +81,9 @@ class Parameter :
             'noise_parameter':{
                 'nsig':[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0],
                 'ntau':0.0,
-                'dt': 0.5
+                'dt': 0.1
                                 },
-            'dt': 0.5 # in ms
+            'dt': 0.1 # in ms
         }
 
         self.parameter_monitor= {

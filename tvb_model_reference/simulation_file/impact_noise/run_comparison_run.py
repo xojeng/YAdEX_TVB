@@ -1,11 +1,12 @@
 from tvb_model_reference.simulation_file.impact_noise.parameter_TVB import Parameter
+# from tvb_model_reference.simulation_file.impact_noise.parameter_Matteo_original import Parameter
 import tvb_model_reference.src.tools_simulation as tools
 import matplotlib.pyplot as plt
 import copy
 
 parameters = Parameter()
 # tools.print_bistability(parameters.parameter_model,show=False)
-run_sim = 10000.0
+run_sim = 15000.0
 simulator = tools.init(parameters.parameter_simulation,
                               parameters.parameter_model,
                               parameters.parameter_connection_between_region,
